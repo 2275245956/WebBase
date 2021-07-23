@@ -1,0 +1,141 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+
+@*<h2>系统设置</h2>
+    <h3>管理系统设置</h3>*@
+<script>
+    $(function () {
+        gridList();
+        $("#btnRefresh").click(function () {
+            $.reload();
+        });
+        $("#btnCreate").click(btn_add);
+
+        $("#btnEdit").click(btn_edit);
+        $("#btnDelete").click(btn_delete);
+        $("#btnDetail").click(function () {
+            console.log('btnDetails')
+        });
+        $("#btnExport").click(function () {
+            console.log('btnExport');
+        });
+        $("#btnEnvelope").click(function () {
+            console.log('btnEnvelope');
+        });
+    })
+    //刷新
+    function reloadGrid() {
+        $("#gridList").resetSelection();
+        $("#gridList").trigger("reloadGrid");
+    }
+    function gridList() {
+        var $gridList = $("#gridList");
+        var _height = (!!window.ActiveXObject || "ActiveXObject" in window) ? 110 : 145;
+        ////初始化表格  添加表头信息  并绑定属性
+        $gridList.dataGrid({
+            datatype: "json",
+            url: '@Url.Action("GetGridJson")',//"/SystemManage/SysSetting/GetGridJson",
+            height: $(window).height() - _height,
+            colModel: [
+                { label: "@Resources.BaseRes.PrimaryKey", name: "SettingID", hidden: true, key: true },
+                { label: '@Resources.BaseRes.EnCode', name: 'SettingKey', width: 150, align: 'left' },
+                { label: '@Resources.BaseRes.Name', name: 'SettingName', width: 150, align: 'left' },
+                { label: '@Resources.BaseRes.Sys_Value', name: 'SettingValue', width: 150, align: 'left' },
+               {
+                   label: '@Resources.BaseRes.LastUpdateTime', name: 'LastUpdateTime', width: 150, align: 'left',
+                   formatter: "date", formatoptions: { srcformat: 'Y-m-d H:i:s', newformat: 'Y-m-d H:i:s' }
+               },
+
+                { label: '@Resources.BaseRes.Description', name: 'SettingNote', width: 300, align: 'left' }
+            ],
+            pager: "#gridPager",
+            sortname: 'LastUpdateTime asc',
+            viewrecords: true
+        });
+        //模糊查询
+        $("#btn_search").click(function () {
+            $gridList.jqGrid('setGridParam', {
+                postData: { keyword: $("#txt_keyword").val() },
+            }).trigger('reloadGrid');
+        });
+    }
+
+    //添加
+    function btn_add() {
+        $.modalOpen({
+            id: "Form",
+            title: "@Resources.BaseRes.Create",
+            url: '@Url.Action("Form")',//"/SystemManage/SysSetting/Form",
+            width: "700px",
+            height: "360px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+               $.currentWindow().$("#gridList").trigger("reloadGrid");
+            }
+        });
+    }
+    //修改
+    function btn_edit() {
+        var keyValue = $("#gridList").jqGridRowValue().SettingID;
+        // alert(keyValue);
+        $.modalOpen({
+            id: "Form",
+            title: "@Resources.BaseRes.Edit",
+            url: '@Url.Action("Form")' + '?keyValue=' + keyValue,//"/SystemManage/SysSetting/Form?keyValue=" + keyValue,
+            width: "700px",
+            height: "360px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+                reloadGrid();
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+            }
+        });
+    }
+    //删除
+    function btn_delete() {
+        $.deleteForm({
+            url: '@Url.Action("DeleteForm")',//"/SystemManage/SysSetting/DeleteForm",
+            param: { keyValue: $("#gridList").jqGridRowValue().SettingID },
+            success: function () {
+
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+
+            }
+        })
+    }
+
+</script>
+<div class="topPanel">
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <input id="txt_keyword" type="text" class="form-control" placeholder="@Resources.BaseRes.KeyWord" style="width: 200px; ">
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="toolbar">
+
+        @*范文强 2018/12/7  修改按钮加载方式  部分视图*@
+        @Html.Partial("~/Views/Shared/_Partial_LoadButtons.cshtml")
+        @*<script>$('.toolbar').authorizeButton()</script>*@
+    </div>
+
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>
+
+
+

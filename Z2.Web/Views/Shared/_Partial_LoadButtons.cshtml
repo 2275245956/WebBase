@@ -1,0 +1,42 @@
+﻿@using Z2.Core.Web
+@using Z2.Core.WebApp.Model
+@using Z2.Web.Extend
+@{
+    ViewBag.Title = "_Partial_LoadButtons";
+    Layout = "~/Views/Shared/_Form.cshtml";
+    //调用后台的方法获取操作码
+    //将操作码的集合以参数的形式传入到HtmlHelper的扩展方法中
+    List<SysRoleAuthorizeOperate> operates = null;
+    var loginController = this.ViewContext.Controller as HandlerLoginInfoController;
+    if (loginController != null)
+    {
+        operates = loginController.GetOperateCodes();
+    }
+
+
+}
+@*刷新按钮*@
+@Html.ToolButtonRefresh("btnRefresh")
+
+@* 2018/11/29 范文强 修改  功能按钮加载方式 *@
+@try
+    {
+        foreach (SysRoleAuthorizeOperate oper in operates)
+        {
+            @Html.ToolButton("btn" + oper.KeyCode, oper.Icon, oper.Name, operates, oper.KeyCode);
+        }
+    }
+    catch (Exception)
+    {
+
+        return;
+    }
+
+
+
+@*自定义按钮*@
+@*@Html.ToolButton("btnEnvelope", "fa fa-envelope-o", "自定义", operates, "")*@
+
+
+
+

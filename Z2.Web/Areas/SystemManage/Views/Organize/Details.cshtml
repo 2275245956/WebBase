@@ -1,0 +1,142 @@
+﻿@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+<script>
+    var keyValue = $.request("keyValue");
+    $(function () {
+        initControl();
+        $.ajax({
+            url: '@Url.Action("GetFormJson")',//"/SystemManage/Organize/GetFormJson",
+            type: 'post',
+            data: { keyValue: keyValue },
+            dataType: "json",
+            async: false,
+            success: function (data) {
+                $("#form1").formSerialize(data);
+                $("#form1").find('.form-control,select,input').attr('readonly', 'readonly');
+                $("#form1").find('div.ckbox label').attr('for', '');
+            }
+        });
+    });
+    function initControl() {
+        $("#CategoryId").select2({ minimumResultsForSearch: -1 })
+        $("#ParentId").bindSelect({
+            url: '@Url.Action("GetTreeSelectJson")',//"/SystemManage/Organize/GetTreeSelectJson",
+        });
+    }
+</script>
+<form id="form1">
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">@Resources.BaseRes.BaseInfo</a></li>
+            @*<li><a href="#">扩展信息</a></li>*@
+        </ul>
+        <div style="padding-top: 20px; margin-right: 30px;">
+            <table class="form">
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Superior</th>
+                    <td class="formValue">
+                        <select id="ParentId" name="ParentId" class="form-control">
+                            <option value="0">@Resources.BaseRes.ParentId</option>
+                        </select>
+                    </td>
+                    <th class="formTitle">@Resources.BaseRes.Type</th>
+                    <td class="formValue">
+                        <select id="CategoryId" name="Target" class="form-control">
+                            <option value="">==@Resources.BaseRes.Select==</option>
+                            <option value="Group">@Resources.BaseRes.Organize_Bloc</option>
+                            <option value="Company">@Resources.BaseRes.Organize_Company</option>
+                            <option value="Department">@Resources.BaseRes.Organize_Department</option>
+                            <option value="WorkGroup">@Resources.BaseRes.Organize_Group</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Name</th>
+                    <td class="formValue">
+                        <input id="FullName" name="FullName" type="text" class="form-control" />
+                    </td>
+                    <th class="formTitle">@Resources.BaseRes.EnCode</th>
+                    <td class="formValue">
+                        <input id="EnCode" name="EnCode" type="text" class="form-control" />
+                    </td>
+                </tr>
+                <tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Organize_ManagerId</th>
+                    <td class="formValue">
+                        <input id="ManagerId" name="ManagerId" type="text" class="form-control" />
+                    </td>
+                    <th class="formTitle">@Resources.BaseRes.Organize_MobilePhone</th>
+                    <td class="formValue">
+                        <input id="MobilePhone" name="MobilePhone" type="text" class="form-control" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Organize_WeChat</th>
+                    <td class="formValue">
+                        <input id="WeChat" name="WeChat" type="text" class="form-control" />
+                    </td>
+                    <th class="formTitle">@Resources.BaseRes.Organize_Tel</th>
+                    <td class="formValue">
+                        <input id="TelePhone" name="TelePhone" type="text" class="form-control" />
+                    </td>
+                </tr>
+                <tr>
+
+                    <th class="formTitle">@Resources.BaseRes.Organize_Email</th>
+                    <td class="formValue">
+                        <input id="Email" name="Email" type="text" class="form-control" />
+                    </td>
+                    <th class="formTitle">@Resources.BaseRes.Organize_Fax</th>
+                    <td class="formValue">
+                        <input id="Fax" name="Fax" type="text" class="form-control" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Organize_Address</th>
+                    <td class="formValue" colspan="3">
+                        <input id="Address" name="Address" type="text" class="form-control" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle" style="height: 35px;">@Resources.BaseRes.Options</th>
+                    <td class="formValue" colspan="3" style="padding-top: 1px;">
+                        <div class="ckbox">
+                            <input id="EnabledFlag" name="EnabledFlag" type="checkbox" checked="checked"><label for="EnabledFlag">@Resources.BaseRes.EnabledFlag</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle" valign="top" style="padding-top: 5px;">
+                        @Resources.BaseRes.Description
+                    </th>
+                    <td class="formValue" colspan="3">
+                        <textarea id="Description" name="Descriptions" class="form-control" style="height: 60px;"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.CreaterUserId</th>
+                    <td class="formValue">
+                        <input id="CreaterUserId" name="CreaterUserId" type="text" class="form-control" />
+                    </td>
+                    <th class="formTitle">@Resources.BaseRes.CreaterTime</th>
+                    <td class="formValue">
+                        <input id="CreaterTime" name="CreaterTime" type="text" class="form-control" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.LastUpdateUserId</th>
+                    <td class="formValue">
+                        <input id="LastUpdateUserId" name="LastUpdateUserId" type="text" class="form-control" />
+                    </td>
+                    <th class="formTitle">@Resources.BaseRes.LastUpdateTime </th>
+                    <td class="formValue">
+                        <input id="LastUpdateTime" name="LastUpdateTime" type="text" class="form-control" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,303 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+<style>
+</style>
+<div class="topPanel">
+
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <input id="txt_keyword" type="text" class="form-control" placeholder=" @Resources.BaseRes.KeyWord " style="width: 200px;">
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    @*范文强 2018/12/06 修改    功能模块按钮固定显示*@
+    <div class="toolbar">
+        <a class="btn btn-primary" onclick="$.reload()"><span class="glyphicon glyphicon-refresh"></span></a>
+        <a id="NF-add" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_add()"><i class="fa fa-plus"></i>@Resources.BaseRes.Create</a>
+        <a id="NF-delete" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_delete()"><i class="fa fa-pencil-square-o"></i>@Resources.BaseRes.Delete</a>
+        <a id="NF-edit" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_edit()"><i class="fa fa-pencil-square-o"></i>@Resources.BaseRes.Edit</a>
+        <a id="NF-Details" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_details()"><i class="fa fa-search-plus"></i>@Resources.BaseRes.Details</a>
+        <a id="NF-addButton" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_addOpcode()"><i class="fa fa-plus"></i>@Resources.BaseRes.Mudule_CreateOpCode</a>
+        @* 操作码修改  fwq_111   2019/2/12  *@
+        <a id="NF-editButton" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_editOpcode()"><i class="fa fa-pencil-square"></i>@Resources.BaseRes.Module_EditOpCode</a>
+        <a id="NF-delButton" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_delOpcode()"><i class="fa fa-trash"></i>@Resources.BaseRes.Mudule_DeletOpCode</a>
+
+    </div>
+</div>
+<div class="ui-layout" id="layout" style="height: 100%; width: 100%; ">
+    <div class="ui-layout-west" id="west" style="width:78% !important;float:left">
+        <div class="moduleGridPanel">
+            <table id="gridList"></table>
+        </div>
+    </div>
+    <div class="ui-layout-center" id="center" style="width:0% !important;float:left;">
+        <div class="middleGridPanel">
+            @*   <table id="middleContent"></table>*@
+        </div>
+    </div>
+    <div class="ui-layout-east" id="east" style="width:22% !important;float:left">
+        <div class="opGridPanel">
+            <table id="operateList"></table>
+        </div>
+    </div>
+</div>
+@section overscripts{
+    <script type="text/javascript">
+        windowResizeHelper.resizeWindow = function () {
+            var newHeight = $(window).height() - $(".topPanel").outerHeight() - 2;
+            console.log('layout height : ' + $(window).height() + " -> " + newHeight);
+            $('#layout').height(newHeight);
+            $('#west').height(newHeight);
+            $('#east').height(newHeight);
+            var gridHeaderHeight = $(".ui-jqgrid-hdiv").outerHeight();
+            $("#gridList").setGridHeight('auto').setGridWidth($('#west').width() - 30);
+            $("#operateList").setGridHeight('auto').setGridWidth($('#east').width() - 30);
+        }
+    </script>
+}
+
+@section scripts{
+    <script src="~/Content/js/layout/jquery.layout.js"></script>
+    <script src="~/Content/js/wdtree/tree.js"></script>
+    <link href="~/Content/js/wdtree/tree.css" rel="stylesheet" />
+
+    <script>
+        $(function () {
+            gridList();
+
+            var myLayout = $('#layout').layout();
+            myLayout.sizePane("west", '78%');
+            myLayout.sizePane("east", '22%');
+            myLayout.sizePane("center", '0%');
+
+            $("#center").css("display", "none");
+        })
+        function gridList() {
+            var $gridList = $("#gridList");
+            $gridList.dataGrid({
+                treeGrid: true,
+                treeGridModel: "adjacency",
+                ExpandColumn: "UrlAddress",
+                url: '@Url.Action("GetTreeGridJson")',//"/SystemManage/Module/GetTreeGridJson",
+                //height: $(window).height() - 86,
+                colModel: [
+                    { label: "@Resources.BaseRes.PrimaryKey", name: "Id", hidden: true, key: true },
+                    { label: '@Resources.BaseRes.Name', name: 'Name', width: 200, align: 'left' },
+                    { label: '@Resources.BaseRes.Mudule_UrlAddress', name: 'UrlAddress', width: 260, align: 'left' },
+                    {
+                        label: '@Resources.BaseRes.Mudule_Target', name: 'Target', width: 80, align: 'center',
+                        formatter: function (cellvalue) {
+                            if (cellvalue == "expand") {
+                                return "@Resources.BaseRes.Mudule_NoPage";
+                            } else if (cellvalue == "iframe") {
+                                return "@Resources.BaseRes.Mudule_FramePage";
+                            } else if (cellvalue == "open") {
+                                return "@Resources.BaseRes.Mudule_PopUpPage";
+                            } else if (cellvalue == "blank") {
+                                return "@Resources.BaseRes.Mudule_NewWindow";
+                            }
+                        }
+                    },
+                    /* 2018/11/28 添加   图标*/
+                    {
+                        label: '@Resources.BaseRes.Module_Icon', name: 'Icon', width: 60, align: 'center',
+                        formatter: function (cellvalue) {
+                            return cellvalue == null ? "<i class='fa fa-gears'></i>" : "<i class='" + cellvalue + "'></i>";
+                        }
+                    },
+                    {
+                        label: "@Resources.BaseRes.Module_Menu", name: "IsMenu", width: 60, align: "center",
+                        formatter: function (cellvalue) {
+                            return cellvalue == true ? "<i class=\"fa fa-toggle-on\"></i>" : "<i class=\"fa fa-toggle-off\"></i>";
+                        }
+                    },
+                    {
+                        label: "@Resources.BaseRes.Module_Expand", name: "IsExpand", width: 60, align: "center",
+                        formatter: function (cellvalue) {
+                            return cellvalue == true ? "<i class=\"fa fa-toggle-on\"></i>" : "<i class=\"fa fa-toggle-off\"></i>";
+                        }
+                    },
+                    {
+                        label: "@Resources.BaseRes.Module_Public", name: "IsPublic", width: 60, align: "center",
+                        formatter: function (cellvalue) {
+                            return cellvalue == true ? "<i class=\"fa fa-toggle-on\"></i>" : "<i class=\"fa fa-toggle-off\"></i>";
+                        }
+                    },
+                    {
+                        label: "@Resources.BaseRes.EnabledFlag", name: "EnabledFlag", width: 60, align: "center",
+                        formatter: function (cellvalue) {
+                            return cellvalue == 1 ? "<i class=\"fa fa-toggle-on\"></i>" : "<i class=\"fa fa-toggle-off\"></i>";
+                        }
+                    },
+                    { label: '@Resources.BaseRes.Description', name: 'Description', width: 100, align: 'left' }
+                ],
+                onSelectRow: function (rowid) {
+                    operateList(rowid);
+
+                    $("#operateList").jqGrid("setGridParam", {
+                        postData: { keyValue: rowid },
+                    }).trigger("reloadGrid");
+                }
+            });
+            $("#btn_search").click(function () {
+                $gridList.jqGrid('setGridParam', {
+                    postData: { keyword: $("#txt_keyword").val() },
+                }).trigger('reloadGrid');
+            });
+        }
+
+        function reloadGrid() {
+            $("#gridList").resetSelection();
+            $("#gridList").trigger("reloadGrid");
+        }
+
+        function operateList(keyValue) {
+            var $operateList = $("#operateList");
+            $operateList.dataGrid({
+                url: '@Url.Action("GetOperateDataJson")',//"/SystemManage/Module/GetOperateDataJson",
+                height: $(window).height() - 86,
+
+                dataType: 'JSON',
+                postData: { keyValue: keyValue },
+                colModel: [
+                    { label: "@Resources.BaseRes.PrimaryKey", name: "Id", hidden: true, key: true },
+                    { label: '@Resources.BaseRes.Name', name: 'Name', width: 80, align: 'left' },
+                    { label: '@Resources.BaseRes.Module_OpCode', name: 'KeyCode', width: 80, align: 'left' },
+                    {
+                        label: '@Resources.BaseRes.Module_Icon', name: 'Icon', width: 40, align: 'center',
+                        formatter: function (cellvalue) {
+                            return cellvalue == null ? "<i class='fa fa-gears'></i>" : "<i class='" + cellvalue + "'></i>";
+                        }
+                    },
+                    { label: '@Resources.BaseRes.Sort', name: 'Sort', width: 40, align: 'center' },
+                ],
+                onSelectRow: function (rowid) {
+                    $(".hideEle").show();
+                }
+            });
+        }
+        function btn_add() {
+            $.modalOpen({
+                id: "Form",
+                title: "@Resources.BaseRes.Create",
+                url: '@Url.Action("Form")',//"/SystemManage/Module/Form",
+                width: "700px",
+                height: "440px",
+                callBack: function (iframeId) {
+                    top.frames[iframeId].submitForm();
+                }
+            });
+        }
+        function btn_edit() {
+            var keyValue = $("#gridList").jqGridRowValue().Id;
+            if (keyValue == null) {
+                $.modalMsg('未选择数据', 'error');
+                return;
+            }
+            $.modalOpen({
+                id: "Form",
+                title: "@Resources.BaseRes.Edit",
+                url: '@Url.Action("Form")' + '?keyValue=' + keyValue,//"/SystemManage/Module/Form?keyValue=" + keyValue,
+                width: "700px",
+                height: "440px",
+                callBack: function (iframeId) {
+                    top.frames[iframeId].submitForm();
+                }
+            });
+        }
+        function btn_delete() {
+            var keyValue = $("#gridList").jqGridRowValue().Id;
+            if (keyValue == null) {
+                $.modalMsg('未选择数据', 'error');
+                return;
+            }
+            $.deleteForm({
+                url: '@Url.Action("DeleteForm")',//"/SystemManage/Module/DeleteForm",
+                param: { keyValue: keyValue },
+                success: function () {
+                    $.currentWindow().$("#gridList").resetSelection();
+                    $.currentWindow().$("#gridList").trigger("reloadGrid");
+                }
+            })
+        }
+        function btn_details() {
+            var keyValue = $("#gridList").jqGridRowValue().Id;
+            if (keyValue == null) {
+                $.modalMsg('未选择数据', 'error');
+                return;
+            }
+            $.modalOpen({
+                id: "Details",
+                title: "@Resources.BaseRes.Details",
+                url: '@Url.Action("Details")' + '?keyValue=' + keyValue,//"/SystemManage/Module/Details?keyValue=" + keyValue,
+                width: "700px",
+                height: "490px",
+                btn: null,
+            });
+        }
+        function btn_addOpcode() {
+            var keyValue = $("#gridList").jqGridRowValue().Id;
+            $.modalOpen({
+                id: "addOpcode",
+                title: "@Resources.BaseRes.Mudule_CreateOpCode",
+                url: '@Url.Action("addOpcode")' + '?moduleId=' + keyValue,//"/SystemManage/Module/addOpcode?moduleId=" + keyValue,
+                width: "500px",
+                height: "350px",
+                callBack: function (iframeId) {
+                    top.frames[iframeId].submitForm();
+                }
+            });
+        }
+        function btn_delOpcode() {
+            var keyValue = $("#operateList").jqGridRowValue().Id;
+            if (keyValue == null) {
+                $.modalMsg('未选择数据', 'error');
+                return;
+            }
+            $.modalConfirm("@Resources.BaseRes.DeleteConfirm", function (r) {
+                if (r) {
+                    $.submitForm({
+                        url: '@Url.Action("DelOpcode")',//"/SystemManage/Module/DelOpcode",
+                        type: 'post',
+                        param: { keyValue: keyValue },
+                        dataType: "json",
+                        success: function () {
+                            $.currentWindow().$("#operateList").trigger("reloadGrid");
+                        }
+                    })
+                }
+            })
+        }
+        @* 操作码修改  fwq_111   2019/2/12  *@
+        function btn_editOpcode() {
+            var keyValue = $("#gridList").jqGridRowValue().Id;
+            var opcodeKeyValue = $("#operateList").jqGridRowValue().Id;
+            if (opcodeKeyValue == null) {
+                $.modalMsg('未选择数据', 'error');
+                return;
+            }
+            $.modalOpen({
+                id: "addOpcode",
+                title: "@Resources.BaseRes.Mudule_CreateOpCode",
+                url: '@Url.Action("addOpcode")' + '?moduleId=' + keyValue + '&OpcodeKeyValue=' + opcodeKeyValue,
+                width: "500px",
+                height: "350px",
+                callBack: function (iframeId) {
+                    top.frames[iframeId].submitForm();
+                }
+            });
+        }
+    </script>
+
+
+}

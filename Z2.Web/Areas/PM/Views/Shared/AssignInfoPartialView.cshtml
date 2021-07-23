@@ -1,0 +1,379 @@
+﻿@model Z2.Core.WebApp.Model.Mst_TaskModel
+<div>
+    <div style="text-align:right;padding-bottom:10px;">
+        <div class="btn-group" style="display:none"><a class="btn btn-info" id="btnTempSave"><i class="fa fa-pencil"></i>保存</a></div>
+        <div class="btn-group" style="display:none"><a class="btn btn-info" id="btnTempCancel"><i class="fa fa-close"></i>取消</a></div>
+        <div class="btn-group"><a class="btn btn-primary dropdown-text" id="btnCreate" authorize="true"><i class="fa fa-plus"></i>新增</a></div>
+        <div class="btn-group"><a class="btn btn-info" id="btnTempUp"><i class="fa fa-arrow-up"></i></a></div>
+        <div class="btn-group"><a class="btn btn-info" id="btnTempDown"><i class="fa fa-arrow-down"></i></a></div>
+    </div>
+    <div id="gridContainter">
+        <table id="AssignTable"></table>
+        <div id="pagered"></div>
+    </div>
+</div>
+<style>
+    .removeRowBtn {
+        width: 15px;
+        height: 15px;
+    }
+
+    .middleValue {
+        vertical-align: middle;
+    }
+</style>
+
+<script>
+
+    function getAssignData() {
+        var editingRowId = $("#AssignTable").prop("editingRowId");
+        if (editingRowId) {
+            saveEditingAssignDataToGrid(editingRowId);
+            //$('#AssignTable').jqGrid('saveRow', editingRowId);
+            removeEditingProp();
+        }
+
+        var rst = [];
+        var rowIds = $('#AssignTable').jqGrid('getDataIDs');
+        for (x in rowIds) {
+            var rowId = rowIds[x];
+            var rowData = $('#AssignTable').jqGrid('getRowData', rowId);
+            rst.push({
+                TaskAssignId: rowData.AssignId,
+                AssignTypeId: rowData.AssignTypeId,
+                AssignTypeName: rowData.AssignTypeName,
+                AssignUserId: rowData.AssignUserId,
+                AssignUserName: rowData.AssignUserName,
+                EstimatedHours: rowData.EstimatedHours,
+                AssignDescription: rowData.AssignDescription,
+                StartDate: rowData.StartDate,
+                DueDate: rowData.DueDate,
+                DeleteFlag:false,
+            });
+        }
+        var deletedData = $("#AssignTable").prop("DeletedData");
+        for (x in deletedData) {
+            var rowData = deletedData[x];
+            rst.push({
+                TaskAssignId: rowData.AssignId,
+                AssignTypeId: rowData.AssignTypeId,
+                AssignTypeName: rowData.AssignTypeName,
+                AssignUserId: rowData.AssignUserId,
+                AssignUserName: rowData.AssignUserName,
+                EstimatedHours: rowData.EstimatedHours,
+                AssignDescription: rowData.AssignDescription,
+                StartDate: rowData.StartDate,
+                DueDate: rowData.DueDate,
+                DeleteFlag:true,
+            });
+        }
+        return rst;
+    }
+
+    function removeEditingProp() {
+        $("#AssignTable").removeProp("editingRowId");
+        $("#btnTempSave,#btnTempCancel").parent().hide();
+        $("#btnTempDown,#btnTempUp").removeAttr("disabled");
+    }
+
+    function saveEditingAssignDataToGrid(editingRowId) {
+        var cmd1 = "#" + editingRowId + "_AssignUserName";
+        var assignUserId = $(cmd1).val();
+        var cmd2 = "#" + editingRowId + "_AssignTypeName";
+        var assignTypeId = $(cmd2).val();
+
+        $('#AssignTable').jqGrid('saveRow', editingRowId);
+        $('#AssignTable').jqGrid('setRowData', editingRowId, { AssignUserId: assignUserId, AssignTypeId: assignTypeId });
+
+    }
+    (function ($) {
+        $(function () {
+            pageInit();
+            $(document).on("click", ".removeRowBtn", function () {
+                var rowid = $(this).parent().attr("rowId");
+                removeRow(rowid);
+            });
+
+            $("#btnTempSave").click(function () {
+                var rst = getAssignData();
+                removeEditingProp();
+                return false;
+            });
+
+            $("#btnTempCancel").click(function () {
+                var editingRowId = $("#AssignTable").prop("editingRowId");
+                if (editingRowId) {
+                    $('#AssignTable').jqGrid('restoreRow', editingRowId);
+                }
+                removeEditingProp();
+                return false;
+            });
+
+            $("#btnTempUp").click(function () {
+                var rowid = $("#AssignTable").jqGrid('getGridParam', 'selrow');
+                if (rowid == null || rowid.length == 0) {
+                    return;
+                }
+                moveJqRow('up', rowid);
+                return false;
+            });
+
+            $("#btnTempDown").click(function () {
+                var rowid = $("#AssignTable").jqGrid('getGridParam', 'selrow');
+                if (rowid == null || rowid.length == 0) {
+                    return;
+                }
+                moveJqRow('down', rowid);
+                return false;
+            });
+
+            function moveJqRow(direct, rowid) {
+
+                var srcrowId;
+                var ids = $("#AssignTable").jqGrid('getDataIDs');
+                if (direct == 'up') {
+                    ids = ids.reverse();
+                }
+                var idx = $("#AssignTable").jqGrid('getInd', rowid);
+                if (direct == 'up') {
+                    idx = $("#AssignTable").jqGrid('getGridParam','reccount') - idx;
+                }
+                else {
+                    idx--;
+                }
+                for (var x = idx; x < ids.length; x++) {
+                    if (ids[x] == rowid) {
+                        if (x < ids.length) {
+                            srcrowId = ids[x + 1];
+                        }
+                        break;
+                    }
+                }
+
+                if (srcrowId == null) {
+                    return;
+                }
+                var rowData = $('#AssignTable').jqGrid('getRowData', rowid);
+                $('#AssignTable').jqGrid('delRowData', rowid);
+                if (direct == 'up') {
+                    $("#AssignTable").jqGrid('addRowData', rowid, rowData, "before", srcrowId);
+                }
+                else {
+                    $("#AssignTable").jqGrid('addRowData', rowid, rowData, "after", srcrowId);
+                }
+                $("#AssignTable").jqGrid('setSelection', rowid, false);
+            }
+
+            $("#btnCreate").click(function () {
+                var dt = new Date();
+                var id = "-N-" + dt.getTime();//+ getFullYear() + getMonth() + getDate() + getHours() + getMinutes() + getSeconds()
+                var newData = {
+                    AssignId: id,
+                    AssignTypeId: '',
+                    AssignTypeName: '',
+                    AssignUserId: '',
+                    AssignUserName: '',
+                    AssignDescription: "",
+                    StartDate: "",
+                    DueDate: "",
+                };
+                $("#AssignTable").jqGrid('addRowData', newData.AssignId, newData);
+                $("#AssignTable").jqGrid('setSelection', newData.AssignId);
+            });
+        });
+
+        function removeRow(rowid) {
+            var rowData = jQuery('#AssignTable').jqGrid('getRowData', rowid);
+            if (rowData.AssignId && rowData.AssignId.length > 3 && rowData.AssignId.indexOf("-N-") == 0) {
+                $('#AssignTable').jqGrid('delRowData', rowid);
+                return;
+            }
+
+            if (confirm("确定要删除吗?")) {
+                var rowData = jQuery('#AssignTable').jqGrid('getRowData', rowid);
+               var deletedData = $("#AssignTable").prop("DeletedData");
+                deletedData.push(rowData);
+                $("#AssignTable").prop("DeletedData", deletedData);
+                $('#AssignTable').jqGrid('delRowData', rowid);
+            }
+            else {
+                return false;
+            }
+        }
+
+        function pageInit() {
+            var deletedData = [];
+            $("#AssignTable").prop("DeletedData", deletedData);
+            $("#AssignTable").jqGrid({
+                url: "@Url.Action("GetAssignDataList","Task")",
+                postData: {
+                    taskId: '@Model.TaskId',
+                },
+                datatype: "json",
+                //colNames: ['AssignId', '指派类型', '指派给', '开始日期', '结束日期', '预计工时', '描述', '操作'],
+                colModel: [
+                     { name: 'AssignId', index: 'AssignId', label: 'AssignId', hidden: true }
+                    , { name: 'AssignTypeId', index: 'AssignTypeId', label: 'AssignTypeId', hidden: true }
+                    , {
+                        name: 'AssignTypeName', index: 'AssignTypeName', label: '指派类型', width: 80, editable: true, edittype: "select", editoptions: {
+                            dataUrl: '@Url.Action("GetJqGridSelectJson", "AssignTypeDic")',
+                            dataInit: function (element) {
+                                $(element).hide();
+                                setTimeout(function () {
+                                    $(element).show();
+                                    $(element).bindSelect();                                
+                                },100);
+                            },
+                        }
+                    }
+                    , { name: 'AssignUserId', index: 'AssignUserId', label: 'AssignUserId', hidden: true }
+                    , {
+                        name: 'AssignUserName', index: 'AssignUserName', label: '指派给', width: 80, editable: true, edittype: "select", editoptions: {
+                            dataUrl: '@Url.Action("GetUserForJqGridSelectJson", "Task")',
+                            dataInit: function (element) {
+                                $(element).hide();
+                                setTimeout(function () {
+                                    $(element).show();
+                                    $(element).bindSelect();
+                                }, 100);
+                            },
+                        }
+                    }
+                    , {
+                        name: 'StartDate', index: 'StartDate', label: '开始日期', width: 120, editable: true, editoptions: {
+                            dataInit: function (element) {
+                                $(element).css("margin", 2);
+                                $(element).parent().addClass("formValue");
+                                $(element).unbind("focus")
+                                $(element).addClass("input-wdatepicker").bind("focus", WdatePicker)
+                                $(".form-control").attr("autocomplete", "off");
+                            }
+                        }
+                    }
+                    , {
+                        name: 'DueDate', index: 'DueDate', label: '结束日期', width: 120, editable: true, editoptions: {
+                            dataInit: function (element) {
+                                $(element).css("margin", 2);
+                                $(element).parent().addClass("formValue");
+                                $(element).unbind("focus")
+                                $(element).addClass("input-wdatepicker").bind("focus", WdatePicker)
+                                $(".form-control").attr("autocomplete", "off");
+                            }
+                        }
+                    }
+                    , {
+                        name: 'EstimatedHours', index: 'EstimatedHours', label: '预计工时', width: 80, editable: true, editoptions: {
+                            dataInit: function (element) {
+                                $(element).css("margin", 2);
+                                $(element).parent().addClass("formValue");
+                                $(element).addClass("form-control")
+                                $(".form-control").attr("autocomplete", "off");
+                            }
+                        }
+                    }
+                    , {
+                        name: 'AssignDescription', index: 'AssignDescription', label: '描述', width: 270, editable: true, editoptions: {
+                            dataInit: function (element) {
+                                $(element).css("margin", 2);
+                                $(element).parent().addClass("formValue");
+                                $(element).addClass("form-control")
+                                $(".form-control").attr("autocomplete", "off");
+                            }
+                        }
+                    }
+                    , { name: 'AssignOrder', index: 'AssignOrder', label: '操作', width: 60, formatter: AssignOrder_formatter }
+                ],
+                width: 880,
+                height: 450,
+                rowNum: 1000,
+                //rowList: [10, 20, 30],
+                //pager: '#pagered',
+                sortname: 'Id',
+                viewrecords: true,
+                sortorder: "asc",
+                editurl: "",
+                unwritten: false,
+                shrinkToFit:false,
+                onCellSelect: function (rowid, iCol, cellcontent, e) {
+                    if (iCol == 9) {
+                        $("#AssignTable").prop("deletingRow", true);
+                        setTimeout(function () {
+                            $("#AssignTable").prop("deletingRow", false);
+                        }, 500);
+                    }
+                },
+                onSelectRow: function (id) {
+                    if (true === $("#AssignTable").prop("deletingRow")) {
+                        $("#btnTempCancel").click();
+                        return;
+                    }
+                    var editingRowId = $("#AssignTable").prop("editingRowId")
+                    if (id && editingRowId && id !== editingRowId) {
+                        saveEditingAssignDataToGrid(editingRowId);
+                        var rowData = jQuery('#AssignTable').jqGrid('getRowData', editingRowId);
+                    }
+                    if (id && id !== editingRowId) {
+                        $('#AssignTable').jqGrid('editRow', id, true);
+                        $("#AssignTable").prop("editingRowId", id)
+                        $("#btnTempSave,#btnTempCancel").parent().show();
+                        $("#btnTempDown,#btnTempUp").attr("disabled", "disabled");
+                    }
+                }, gridComplete: function () {
+                    $("#AssignTable").addClass("form");
+                    //$("#AssignTable td").addClass("formValue");
+                    $(".form-control").attr("autocomplete", "off");
+
+                }
+            });
+
+
+            function AssignOrder_formatter(cellValue, options, rowObject) {
+                return '<div rowId="' + options.rowId + '" class="ui-state-default ui-corner-all " style="border:none;background:none;" ><img src="@Url.Content("~/Content/img/button_pm_close.png")" class="removeRowBtn" /></div>';
+            }
+        }
+
+    })($);
+
+
+
+</script>
+
+<script type="text/javascript">
+
+
+    (function ($) {
+        var t = null;
+        $(window).resize(function () {
+            if (t != null) {
+                clearTimeout(t);
+            }
+            t = setTimeout(function () {
+                windowResizeHelper.resizeWindow();
+                t = null;
+            }, 300);
+        });
+        $(function () {
+            if (t != null) {
+                clearTimeout(t);
+            }
+            t = setTimeout(function () {
+                windowResizeHelper.resizeWindow();
+                t = null;
+            }, 300);
+
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                $(window).resize();
+            })
+        });
+
+
+
+        var windowResizeHelper = {
+            resizeWindow: function () {
+                var newHeight = $(window).height() - $("#gridContainter").position().top -$(".ui-jqgrid-hdiv").outerHeight() - $("#gridPager").outerHeight() - 2;
+                $("#AssignTable").setGridHeight(newHeight); //.setGridWidth($(window).width() - 20)
+                //$("#AssignTable").jqGrid("updateColumns");
+            },
+        };
+    })($);
+</script>

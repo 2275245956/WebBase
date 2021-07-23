@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <link href="~/Content/css/framework-font.css" rel="stylesheet" />
+    <link href="~/Content/css/framework-theme.css" rel="stylesheet" />
+    <script src="~/Content/js/jquery/jquery-2.1.1.min.js"></script>
+    <script src="~/Content/js/bootstrap/bootstrap.js"></script>
+    <link href="~/Content/js/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Content/js/jqgrid/jqgrid.min.js"></script>
+    <link href="~/Content/js/jqgrid/jqgrid.css" rel="stylesheet" />
+    <script src="~/Content/js/jqgrid/grid.locale-cn.js"></script>
+    <link href="~/Content/css/framework-ui.css" rel="stylesheet" />
+    <script src="~/Content/js/framework-ui.js"></script>
+</head>
+<body>
+    @RenderBody()
+    @Html.AntiForgeryToken()
+
+    @*2018/10/22  范文强*@
+    <!-- #region 根据窗口大小  JQGrid自适应大小 -->
+    <script type="text/javascript">
+        var windowResizeHelper = {
+            resizeWindow: function () {
+                var newHeight = $(window).height() - $(".topPanel").outerHeight() - $(".ui-jqgrid-hdiv").outerHeight() - $("#gridPager").outerHeight() - 2;
+                $("#gridList").setGridWidth($(window).width()).setGridHeight(newHeight);
+                windowResizeHelper.after_resizeWindow();
+            },
+            after_resizeWindow: function () { }
+        };
+    </script>
+    @RenderSection("overscripts", false)
+    <script>
+        (function ($) {
+            var t = null;
+            $(window).resize(function () {
+                if (t != null) {
+                    clearTimeout(t);
+                }
+                t = setTimeout(function () {
+                    windowResizeHelper.resizeWindow();
+                    t = null;
+                }, 300);
+            });
+            $(function () {
+                if (t != null) {
+                    clearTimeout(t);
+                }
+                t = setTimeout(function () {
+                    windowResizeHelper.resizeWindow();
+                    t = null;
+                }, 300);
+            });
+        })($);
+
+        $(function () {
+            $("#btnRefresh").click(function () {
+                $.reload();
+            });
+        })
+
+        var commhelper = {
+            Dateformat: function (date, fmt) {
+
+                var o = {
+                    "M+": date.getMonth() + 1, //月份
+                    "d+": date.getDate(), //日
+                    "h+": date.getHours(), //小时
+                    "m+": date.getMinutes(), //分
+                    "s+": date.getSeconds(), //秒
+                    "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+                    "S": date.getMilliseconds() //毫秒
+                };
+                if (/(y+)/.test(fmt)) {
+                    fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+                }
+                for (var k in o) {
+                    if (new RegExp("(" + k + ")").test(fmt)) {
+                        fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                    }
+                }
+                return fmt;
+            },
+        }
+    </script>
+    <!-- #endregion -->
+    @RenderSection("scripts", false)
+
+</body>
+</html>

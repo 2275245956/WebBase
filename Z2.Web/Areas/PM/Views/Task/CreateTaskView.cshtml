@@ -1,0 +1,134 @@
+﻿@model Z2.Core.WebApp.Model.Mst_TaskModel
+@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+    //var item = Model.Assign;
+}
+
+@using (Html.BeginForm("CreateTask", "Task", FormMethod.Post, new { @id = "form1", enctype = "multipart/form-data" }))
+{
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs" id="TaskTab">
+            <li class="active"><a href="#BasicInfo" data-toggle="tab">基本信息</a></li>
+            @*<li style="display:none"><a href="#AssignInfo" data-toggle="tab">指派信息</a></li>*@
+        </ul>
+        <div class="tab-content">
+            <div id="BasicInfo" class="tab-pane active" style="padding-top: 10px; margin-right: 30px;">
+                @Html.Partial("TaskEditPartialView", Model)
+                <table class="form">
+                    <tr>
+                        <th class="formTitle">对应内容</th>
+                        <td class="formValue" colspan="5">
+                            <textarea id="TaskContent" name="TaskContent" class="form-control" style="height: 60px;width:97%"></textarea>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <th class="formTitle">文件</th>
+                        <td class="formValue" colspan="5">
+                            <input type="file" id="FileName" name="FileName" />
+                        </td>
+                    </tr>
+                </table>
+                <button type="submit" id="submit" style="display:none"></button>
+            </div>
+            @*<div id="AssignInfo" class="tab-pane" style="padding-top: 10px;">
+                @Html.Partial("AssignInfoPartialView", Model)
+            </div>*@
+        </div>
+    </div>
+    @*@Html.AntiForgeryToken()*@
+    @*<div>
+            @Html.Partial("TaskEditPartialView", Model)
+
+        </div>*@
+
+}
+
+<script src="~/Content/js/UploadFile/ajaxfileupload.js"></script>
+@*<script src="~/Content/js/UploadFile/ajaxfileupload.js"></script>
+    <script src="~/Content/js/ueditor/ueditor.config.js"></script>
+    <script src="~/Content/js/ueditor/ueditor.all.js"></script>
+
+    <script type="text/javascript">
+        (function ($) {
+            $(function () {
+                $("#ProjectId").bindSelect();
+                $("#TaskPriority").bindSelect();
+                $("#DevUserId").bindSelect();
+                $("#TestUserId").bindSelect();
+
+                var ue = UE.getEditor('TaskDescriptionEditor', {
+                    toolbars: [
+                        ['source', 'undo', 'redo', 'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'blockquote', 'pasteplain', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall']],
+                    autoHeightEnabled: true,
+                    autoFloatEnabled: true,
+                    initialFrameWidth: 735,
+                    initialFrameHeight: 200
+                });
+            });
+
+        })($);
+
+    </script>*@
+
+<script>
+    //$(document).on("click", "#AssignInformation", function () {
+    //    getAssignList();
+    //});
+    function submitForm() {
+        //var AssignList = getAssignData();
+
+        $('#TaskTab a[href="#BasicInfo"]').tab('show')
+        if (!$('#form1').formValid()) {
+            return false;
+        }
+
+        //$("#AssignInfo").append($("#AssignInfo"));
+        //setTimeout(function () {
+        //    $("#AssignInfo").after($("#BasicInfo"));
+        //}, 500);
+        var formData = $("#form1").formSerialize();
+        formData.TaskDescription = StringUtil.Base64Encode(editor.getContent());
+        //if (AssignList.length > 0) {
+        //    formData.AssignsStrFromView = StringUtil.Base64Encode(JSON.stringify(AssignList));
+        //}
+        ajaxFileUpload(formData, "");
+        //$.submitForm({
+        //    url: "/PM/Task/CreateTask",
+        //    param: formData,
+        //    success: function () {
+        //        $.currentWindow().$("#gridList").trigger("reloadGrid");
+        //    }
+        //})
+        console.log("hello");
+    }
+
+    function ajaxFileUpload(taskData, AssignList) {
+        $.ajaxFileUpload({
+            url: '@Url.RouteUrl("PM_default", new{ controller = "Task", action = "CreateTask"})',
+            secureuri: false,
+            fileElementId: 'FileName',
+            dataType: 'json',
+            data: taskData,
+            success: function (data, status) {
+                if (data.state == 'success') {                    
+                    $.modalClose();
+                    $.currentWindow().reloadGrid();                   
+                }
+                else {
+                    alert(data.message);
+                }
+            },
+            error: function (data, status, e) {
+                alert(e);
+            }
+        });
+        return false;
+    }
+
+    $(function () {
+        $(".form-control").attr("autocomplete", "off");
+    })
+
+</script>

@@ -1,0 +1,153 @@
+﻿
+@{
+    var monthStart = DateTime.Parse(string.Format("{0:yyyy-MM-01}", DateTime.Now.Date));
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+<style>
+    .WorkDate {
+        color: #0563C1;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+</style>
+<div class="topPanel">
+    <div class="toolbar">
+
+        @*范文强 2018/12/7  修改按钮加载方式  部分视图*@
+        @Html.Partial("~/Views/Shared/_Partial_LoadButtons.cshtml")
+        @*<script>$('.toolbar').authorizeButton()</script>*@
+    </div>
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <label for="WorkerId" style="margin-left:5px;">年月：</label>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <input id="SearchData" type="text" class="form-control" style="width: 200px;" onfocus="WdatePicker({ dateFmt: 'yyyy-MM' })" value="@string.Format("{0:yyyy-MM}",DateTime.Now)">
+
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>
+
+<script>
+
+    $(function () {
+        initGrid();
+
+        $("#btn_search").click(function () {
+            $.jgrid.gridUnload("#gridList");
+            initGrid();
+        });
+
+        $(document).on("click",
+            '.WorkDate',
+            function () {
+                var date = $(this).attr("date")
+                var userId = $(this).attr("userId")
+                var title = $(this).attr("username");
+                var url = '@Url.Action("UserDateTask")' + '?userId=' + userId + '&TaskDate=' + date;
+                $.addNewWindow(title + '(' + date + ')', url); ///SystemManage/Organize/Index
+            });
+    })
+
+</script>
+
+<script>
+
+    //var cloumns;
+    //var cloumdata;
+    //var SearchData = $("#SearchData").val();
+
+    function initGrid() {
+
+        var SearchData = $("#SearchData").val();
+        $.ajax({
+            url: '@Url.Action("GetCloumns")',
+            data: { SearchData: SearchData },
+            type: 'get',
+            success: function (data) {
+
+                for (var i = 4; i < data.colModel.length; i++) {
+                    data.colModel[i].formatter = dayformatter;
+                }
+                _initGridWithColModel(data.colModel);
+                getGridData();
+            }
+        })
+    }
+
+    function _initGridWithColModel(colModel) {
+        var windowWidth = $(window).width();
+        $("#gridList").dataGrid({
+            datatype: 'local',
+            width: windowWidth,
+            pager: "#gridPager",
+            sortable: false,
+            shrinkToFit: false,
+            unwritten: false,
+            colModel: colModel,
+            loadonce:false,
+            gridComplete: function () {
+                //
+            },
+        });
+    }
+
+
+
+    function getGridData() {
+        jQuery("#gridTable").jqGrid("clearGridData");
+        var SearchData = $("#SearchData").val();
+        $.ajax({
+            url: '@Url.Action("GetGridData")',
+            data: { SearchData: SearchData },
+            //dataType: "json",
+            type: 'get',
+            success: function (data) {
+
+                var cloumdata = JSON.parse(JSON.parse(data).m_StringValue);
+                $("#gridList").jqGrid('setGridParam', {
+                    datatype: 'local',
+                    data: cloumdata
+                }).trigger("reloadGrid");
+
+                //for (var i = 0; i <= cloumdata.length; i++) {
+                //    jQuery("#gridList").jqGrid('addRowData', i + 1, cloumdata[i]);
+                //}
+            }
+        })
+    }
+
+    function dayformatter(cellvalue, rowObject, options) {
+        if (cellvalue) {
+            var date = cellvalue.split('_')[0];
+            var time = cellvalue.split('_')[1];
+            return '<a href="javascript:void(0);" class="WorkDate" date=' + date + ' userId=' + options.userId + ' username=' + options.username + '>'
+                + time +
+                   '</a>';
+        }
+        else {
+            return '';
+        }
+    }
+
+    function daycellattr(cellvalue, options, rowObject) {
+        if (cellvalue) {
+            return "style='background-color:#d4e1f5;'";
+        }
+    }
+
+</script>

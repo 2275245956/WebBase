@@ -1,0 +1,121 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+<script>
+    var keyValue = $.request("moduleId");
+    var OpcodeKeyValue = $.request("OpcodeKeyValue");
+    $(function() {
+        GetModuleData();
+        GetModuleName();
+        $("#MoudleId").attr("value", keyValue);
+        $("#Id").attr("value", OpcodeKeyValue);
+
+    });
+    function GetModuleData() {
+        $.ajax({
+            url: '@Url.Action("GetModuleData")', //"/SystemManage/Module/GetModuleData",
+            data: { keyValue: OpcodeKeyValue },
+            type: 'post',
+            dataType: "json",
+            success: function (result) {
+                if (result != null && result.Icon) {
+                    $("#IconPic").attr("class", result.Icon);
+                }
+                $("#form1").formSerialize(result);
+            }
+        });
+    }
+
+    function GetModuleName() {
+        $.ajax({
+            url: '@Url.Action("GetModuleName")',//"/SystemManage/Module/GetModuleName",
+            data: { keyValue: keyValue },
+            type: 'post',
+            dataType: "json",
+            success: function (result) {
+                $("#ModuleName").attr("value", result.Name);
+            }
+        })
+    }
+    function submitForm() {
+        if (!$("#form1").formValid()) {
+            return false;
+        }
+        var postData = $("#form1").formSerialize();
+        postData.ModuleId = $("#MoudleId").val();
+        postData.Id = $("#Id").val();
+        $.submitForm({
+            url: '@Url.Action("SubmitOpcode")',//"/SystemManage/Module/SubmitOpcode",
+            type: 'post',
+            param: postData,
+            success: function () {
+                $.currentWindow().$("#operateList").trigger("reloadGrid");
+            }
+        })
+    }
+
+</script>
+<form id="form1">
+    <div style="padding-top:40px;margin-right:40px;">
+        <table class="form">
+            <tr>
+                <th class="formTitle">@Resources.BaseRes.OptionName</th>
+                <td class="formValue">
+                    <input type="text" hidden id="MoudleId" name="MoudleId" />
+                    <input type="text" hidden id="Id" name="Id" />
+                    <input type="text" id="Name" name="Name" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <th class="formTitle">@Resources.BaseRes.OptionCode</th>
+                <td class="formValue">
+                    <input type="text" id="KeyCode" name="KeyCode" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <th class="formTitle">@Resources.BaseRes.Module_ModuleId</th>
+                <td class="formValue">
+                    <input type="text" id="ModuleName" name="ModuleName" readonly class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <th class="formTitle">@Resources.BaseRes.Module_Icon</th>
+                <td class="formValue">
+                    <i id="IconPic" class="fa fa-hand-pointer-o" title="@Resources.BaseRes.Module_ChangeIcon" style="cursor:pointer" data-toggle="modal" data-target="#IconList"></i>
+                    <input type="hidden" id="Icon" name="Icon" style="display:none" readonly class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <th class="formTitle">@Resources.BaseRes.Sort</th>
+                <td class="formValue">
+                    <input type="text" id="Sort" name="Sort" class="form-control" />
+                </td>
+            </tr>
+        </table>
+    </div>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="IconList" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">
+                        ×
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        <i class="fa fa-pencil-square-o"></i> @Resources.BaseRes.Module_Icon
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    @Html.Partial("~/Views/Shared/_IconList.cshtml")
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+</form>
+

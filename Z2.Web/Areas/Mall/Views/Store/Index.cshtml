@@ -1,0 +1,149 @@
+﻿@using Z2.Web.Extend
+@using Z2.Core.WebApp.Model
+@using Z2.Core.Web
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+    List<SysRoleAuthorizeOperate> operates = null;
+    var loginController = this.ViewContext.Controller as HandlerLoginInfoController;
+    if (loginController != null)
+    {
+        operates = loginController.GetOperateCodes();
+    }
+}
+<script>
+    $(function () {
+        gridList();
+        $("#btnRefresh").click(function () {
+            $.reload();
+        })
+        $("#btnAdd").click(btn_add)
+        $("#btnEdit").click(btn_edit);
+        $("#btnDel").click(btn_delete);
+        $("#btnDetail").click(btn_details);
+    })
+    function reloadGrid() {
+        $("#gridList").resetSelection();
+        $("#gridList").trigger("reloadGrid");
+    }
+    function gridList() {
+        var $gridList = $("#gridList");
+        //根据浏览器的不同显示 分页条
+        var _height = (!!window.ActiveXObject || "ActiveXObject" in window) ? 110 : 145;
+        $gridList.dataGrid({
+
+            url: "/Mall/Store/GetGridJson",
+            height: $(window).height() - _height,
+            colModel: [
+                { label: "主键", name: "Id", hidden: true, key: true },
+                { label: '店铺名称', name: 'ItemName', width: 150, align: 'left' },
+                { label: '店铺编号', name: 'ItemCode', width: 150, align: 'left' },
+               // { label: '店铺简称', name: 'Simplespelling', width: 80, align: 'left' },
+                { label: '图片路径', name: 'Logo', width: 150, align: 'left' },
+                {
+                    label: '创建时间', name: 'CreaterTime', width: 80, align: 'left',
+                    formatter: "date", formatoptions: { srcformat: 'Y-m-d', newformat: 'Y-m-d' }
+                },
+                {
+                    label: "有效", name: "EnabledFlag", width: 60, align: "center",
+                    formatter: function (cellvalue) {
+                        return cellvalue == 1 ? "<i class=\"fa fa-toggle-on\"></i>" : "<i class=\"fa fa-toggle-off\"></i>";
+                    }
+                },
+                { label: '备注', name: 'Description', width: 300, align: 'left' }
+            ],
+            pager: "#gridPager",
+            sortname: 'Creatertime asc',
+            viewrecords: true
+        });
+        $("#btn_search").click(function () {
+            $gridList.jqGrid('setGridParam', {
+                postData: { keyword: $("#txt_keyword").val() },
+            }).trigger('reloadGrid');
+        });
+    }
+    function btn_add() {
+        $.modalOpen({
+            id: "Form",
+            title: "新增店铺",
+            url: "/Mall/Store/Form",
+            width: "710px",
+            height: "500px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+            }
+        });
+    }
+    function btn_edit() {
+        var keyValue = $("#gridList").jqGridRowValue().Id;
+        $.modalOpen({
+            id: "Form",
+            title: "修改信息",
+            url: "/Mall/Store/Form?keyValue=" + keyValue,
+            width: "560px",
+            height: "500px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+            }
+        });
+    }
+    function btn_delete() {
+        $.deleteForm({
+            url: "/Mall/Store/DeleteForm",
+            param: { keyValue: $("#gridList").jqGridRowValue().Id },
+            success: function () {
+                $.currentWindow().$("#gridList").resetSelection();
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+            }
+        })
+    }
+    function btn_details() {
+        var keyValue = $("#gridList").jqGridRowValue().Id;
+        $.modalOpen({
+            id: "Details",
+            title: "查看信息",
+            url: "/Mall/Store/Details?keyValue=" + keyValue,
+            height: "710px",
+            width: "560px",
+            btn: null,
+        });
+    }
+</script>
+<div class="topPanel">
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <input id="txt_keyword" type="text" class="form-control" placeholder="店铺/简称" style="width: 200px;">
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="toolbar">
+        @*刷新按钮*@
+        @Html.ToolButtonRefresh("btnRefresh")
+        @*新建按钮*@
+        @Html.ToolButtonAdd("btnAdd", operates)
+        @*修改按钮*@
+        @Html.ToolButtonEdit("btnEdit", operates)
+        @*删除按钮*@
+        @Html.ToolButtonDelete("btnDel", operates)
+        @*详细按钮*@
+        @Html.ToolButtonDetail("btnDetail", operates)
+        @*导出按钮*@
+        @Html.ToolButtonExport("btnExport", operates)
+        @*自定义按钮*@
+        @Html.ToolButton("btnEnvelope", "fa fa-envelope-o", "自定义", operates, "")
+        @*<script>$('.toolbar').authorizeButton()</script>*@
+    </div>
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>
+

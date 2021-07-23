@@ -1,0 +1,363 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CreaterTime" xml:space="preserve">
+    <value>作成時間</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>コメント</value>
+  </data>
+  <data name="EnabledFlag" xml:space="preserve">
+    <value>有効</value>
+  </data>
+  <data name="EnCode" xml:space="preserve">
+    <value>コード</value>
+  </data>
+  <data name="KeyWord" xml:space="preserve">
+    <value>キーワード検索</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>ネーム</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>登録</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>ログイン</value>
+  </data>
+  <data name="Login_Welcome" xml:space="preserve">
+    <value>グイン歓迎</value>
+  </data>
+  <data name="AllowDelete" xml:space="preserve">
+    <value>削除を許可する</value>
+  </data>
+  <data name="AllowEdit" xml:space="preserve">
+    <value>編集を許可する</value>
+  </data>
+  <data name="BaseInfo" xml:space="preserve">
+    <value>基本情報</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>創建</value>
+  </data>
+  <data name="CreaterUserId" xml:space="preserve">
+    <value>創設者</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="DeleteConfirm" xml:space="preserve">
+    <value>注:これを削除することになりましたか?</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>しょうさい</value>
+  </data>
+  <data name="Duty_BusinessRole" xml:space="preserve">
+    <value>業務上のキャラクター</value>
+  </data>
+  <data name="Duty_OtherRole" xml:space="preserve">
+    <value>その他のキャラクター</value>
+  </data>
+  <data name="Duty_SystemRole" xml:space="preserve">
+    <value>システム上のキャラクター</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>書替え</value>
+  </data>
+  <data name="Input" xml:space="preserve">
+    <value>入力してください</value>
+  </data>
+  <data name="ItemSelected" xml:space="preserve">
+    <value>もう一つ選びました</value>
+  </data>
+  <data name="LastUpdateTime" xml:space="preserve">
+    <value>時間を改める</value>
+  </data>
+  <data name="LastUpdateUserId" xml:space="preserve">
+    <value>改修要員</value>
+  </data>
+  <data name="Login_ForgetPwd" xml:space="preserve">
+    <value>パスワードを忘れる</value>
+  </data>
+  <data name="Login_LoginSuccess" xml:space="preserve">
+    <value>登録に成功し、ジャンプしている</value>
+  </data>
+  <data name="Login_Password" xml:space="preserve">
+    <value>パスワード</value>
+  </data>
+  <data name="Login_RememberPwd" xml:space="preserve">
+    <value>パスワードを覚える</value>
+  </data>
+  <data name="Login_UserName" xml:space="preserve">
+    <value>ユーザー名</value>
+  </data>
+  <data name="Module_ChangeIcon" xml:space="preserve">
+    <value>アイコンの交換をクリックする</value>
+  </data>
+  <data name="Module_Expand" xml:space="preserve">
+    <value>はばったい</value>
+  </data>
+  <data name="Module_Icon" xml:space="preserve">
+    <value>アイコン</value>
+  </data>
+  <data name="Module_ModuleId" xml:space="preserve">
+    <value>所属モジュール</value>
+  </data>
+  <data name="Module_NewWindow" xml:space="preserve">
+    <value>新しい窓</value>
+  </data>
+  <data name="Module_OpCode" xml:space="preserve">
+    <value>操作コード</value>
+  </data>
+  <data name="Module_Public" xml:space="preserve">
+    <value>こうきょう</value>
+  </data>
+  <data name="Mudule_CreateOpCode" xml:space="preserve">
+    <value>動作コードを作成する</value>
+  </data>
+  <data name="Mudule_DeletOpCode" xml:space="preserve">
+    <value>删除操作码</value>
+  </data>
+  <data name="Mudule_FramePage" xml:space="preserve">
+    <value>フレームページ</value>
+  </data>
+  <data name="Mudule_Menu" xml:space="preserve">
+    <value>メニュー</value>
+  </data>
+  <data name="Mudule_NoPage" xml:space="preserve">
+    <value>ページなし</value>
+  </data>
+  <data name="Mudule_PopUpPage" xml:space="preserve">
+    <value>ポップアップページ</value>
+  </data>
+  <data name="Mudule_Target" xml:space="preserve">
+    <value>もくてき</value>
+  </data>
+  <data name="Mudule_UrlAddress" xml:space="preserve">
+    <value>操作コードを削除する</value>
+  </data>
+  <data name="Office_EndTime" xml:space="preserve">
+    <value>終了時間</value>
+  </data>
+  <data name="Office_StartTime" xml:space="preserve">
+    <value>開始時間</value>
+  </data>
+  <data name="OptionCode" xml:space="preserve">
+    <value>操作コード</value>
+  </data>
+  <data name="OptionName" xml:space="preserve">
+    <value>操作名</value>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>オプション</value>
+  </data>
+  <data name="OrganizeName" xml:space="preserve">
+    <value>帰属機構</value>
+  </data>
+  <data name="Organize_Address" xml:space="preserve">
+    <value>あて先</value>
+  </data>
+  <data name="Organize_Bloc" xml:space="preserve">
+    <value>ブロツク</value>
+  </data>
+  <data name="Organize_Company" xml:space="preserve">
+    <value>こうし</value>
+  </data>
+  <data name="Organize_Department" xml:space="preserve">
+    <value>ぶもん</value>
+  </data>
+  <data name="Organize_Email" xml:space="preserve">
+    <value>ポスト</value>
+  </data>
+  <data name="Organize_Fax" xml:space="preserve">
+    <value>ファクシミリ</value>
+  </data>
+  <data name="Organize_Group" xml:space="preserve">
+    <value>ﾊﾟｰﾃｨｰ</value>
+  </data>
+  <data name="Organize_ManagerId" xml:space="preserve">
+    <value>やくいん</value>
+  </data>
+  <data name="Organize_MobilePhone" xml:space="preserve">
+    <value>じゅわき</value>
+  </data>
+  <data name="Organize_Tel" xml:space="preserve">
+    <value>電話機</value>
+  </data>
+  <data name="Organize_WeChat" xml:space="preserve">
+    <value>うぃーちゃっと</value>
+  </data>
+  <data name="ParentId" xml:space="preserve">
+    <value>父ノード</value>
+  </data>
+  <data name="PrimaryKey" xml:space="preserve">
+    <value>メインキー</value>
+  </data>
+  <data name="Select" xml:space="preserve">
+    <value>選択してください</value>
+  </data>
+  <data name="Sort" xml:space="preserve">
+    <value>表示順</value>
+  </data>
+  <data name="Superior" xml:space="preserve">
+    <value>長上</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>タイプ</value>
+  </data>
+  <data name="Page_dataNum" xml:space="preserve">
+    <value>ページごとのデータバー数</value>
+  </data>
+  <data name="Page_ifSeparatePage" xml:space="preserve">
+    <value>ページを分けるかどうか</value>
+  </data>
+  <data name="Page_InfoId" xml:space="preserve">
+    <value>一覧情報Id</value>
+  </data>
+  <data name="Page_InfoName" xml:space="preserve">
+    <value>一覧情報名</value>
+  </data>
+  <data name="Page_NoSeparatePage" xml:space="preserve">
+    <value>ページを分らない</value>
+  </data>
+  <data name="Page_SeparatePage" xml:space="preserve">
+    <value>ページング方式</value>
+  </data>
+  <data name="Sys_Value" xml:space="preserve">
+    <value>値</value>
+  </data>
+  <data name="FastDevPlatForm" xml:space="preserve">
+    <value>高速開発プラットフォーム</value>
+  </data>
+  <data name="ErrorInfo" xml:space="preserve">
+    <value>ユーザー名や暗証番号が間違っています</value>
+  </data>
+  <data name="FirstPage" xml:space="preserve">
+    <value>トップページ</value>
+  </data>
+  <data name="AuthorityMsg" xml:space="preserve">
+    <value>この操作を実行する権限がありませんことを申し訳ありません!</value>
+  </data>
+  <data name="Module_EditOpCode" xml:space="preserve">
+    <value>操作コードを修正する</value>
+  </data>
+</root>

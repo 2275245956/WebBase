@@ -1,0 +1,168 @@
+﻿@model Z2.Core.WebApp.Model.Mst_TaskModel
+
+
+<table class="form">
+    <tr>
+        <th class="formTitle">标题<span style="color:red">*</span></th>
+        <td class="formValue" colspan="8" id="widthFlag">
+            @Html.HiddenFor(m=>m.TaskId)
+            @*<input id="TaskName" name="TaskName" type="text" class="form-control required" />*@@*@Html.TextBoxFor(m=>m.TaskName,new { @class= "form-control required" })*@
+            @Html.TextBoxFor(m=>m.TaskName,new { @class = "form-control required" })
+        </td>
+    </tr>
+    <tr>
+        <th class="formTitle">项目<span style="color:red">*</span></th>
+        <td class="formValue" colspan="2">
+            @*<select id="ProjectId" name="ProjectId" class="form-control required">
+                @foreach (dynamic item in ViewBag.Projects)
+                {
+                    <option value="@item.ProjectId"> @item.ProjectName</option>
+                }
+            </select>*@
+            @Html.DropDownListFor(m => m.ProjectId, (SelectList)ViewBag.ProjectList, new { @class = "form-control required" })
+        </td>
+        <th class="formTitle">优先级/类型<span style="color:red">*</span></th>
+        <td class="formValue">
+            @*<select id="TaskPriority" name="TaskPriority" class="form-control required">
+                @foreach (dynamic item2 in ViewBag.TaskPriority[0])
+                {
+                    if (item2.Key == 1)
+                    {
+                        <option value="@item2.Key" selected="selected"> @item2.Value</option>
+                    }
+                    else
+                    {
+                        <option value="@item2.Key"> @item2.Value</option>
+                    }
+                }
+            </select>*@
+            
+            @Html.DropDownListFor(m => m.TaskPriority, (SelectList)ViewBag.TaskPriorityList, new { @class = "form-control required" })
+        </td>
+        <td class="formValue">
+            @Html.DropDownListFor(m => m.TaskCategory, (SelectList)ViewBag.TaskCatepory, new { @class = "form-control required" })
+        </td>
+        <th class="formTitle">进度<span style="color:red">*</span>/任务号</th>
+        <td class="formValue" >
+            @*<input id="TaskPercent" name="TaskPercent" type="text" class="form-control " />*@
+            @Html.TextBoxFor(m => m.TaskPercent, new { @class = "form-control required" })
+        </td>
+        <td class="formValue">
+            @Html.TextBoxFor(m => m.LinkTaskId, new { @class="form-control"})
+        </td>
+    </tr>
+    <tr>
+        <th class="formTitle">开始日期</th>
+        <td class="formValue" colspan="2">
+            @*<input id="StartDate" name="StartDate" type="text" class="form-control input-wdatepicker" onfocus="WdatePicker()" />*@
+            @Html.TextBoxFor(m => m.StartDate, new { @class = "form-control input-wdatepicker", onfocus = "WdatePicker()", @Value = Model.StartDateStr })
+        </td>
+        <th class="formTitle"><span style="margin-left:16px">预计结束日期</span></th>
+        <td class="formValue" colspan="2">
+            @*<input id="DueDate" name="DueDate" type="text" class="form-control input-wdatepicker" onfocus="WdatePicker()" />*@
+            @Html.TextBoxFor(m => m.DueDate, new { @class = "form-control input-wdatepicker", onfocus = "WdatePicker()" ,@Value=Model.DueDateStr})
+        </td>
+        <th class="formTitle">&nbsp;任务状态</th>
+        <td class="formValue"  colspan="2">
+            @*<input id="EstimatedHours" name="EstimatedHours" type="text" class="form-control " />*@
+            @Html.DropDownListFor(m => m.TaskStatus, (SelectList)ViewBag.TaskStatusList, new { @class = "form-control required" })
+        </td>
+    </tr>
+    <tr>
+         <th class="formTitle">指派开发</th>
+         <td class="formValue">
+             @Html.DropDownListFor(m=>m.DevUserId, (SelectList)ViewBag.UserInfoList, new { @class = "form-control selectpicker" })
+             @Html.HiddenFor(m => m.DevAssignTypeId)
+         </td>
+         <td class="formValue">
+             @Html.TextBoxFor(m => m.DevEstimatedHours, new { @class = "form-control" })
+          </td>
+         <th class="formTitle">指派review</th>
+         <td class="formValue">
+             @Html.DropDownListFor(m => m.ReviewUserId, (SelectList)ViewBag.UserInfoList, new { @class = "form-control selectpicker" })
+             @Html.HiddenFor(m => m.ReviewAssignTypeId)
+         </td>
+         <td class="formValue">
+             @Html.TextBoxFor(m => m.ReviewEstimatedHours, new { @class = "form-control" })
+         </td>
+         <th class="formTitle"><span style="margin-left:16px">指派测试</span></th>
+         <td class="formValue">
+             @Html.DropDownListFor(m => m.TestUserId, (SelectList)ViewBag.UserInfoList, new { @class = "form-control selectpicker" })
+             @Html.HiddenFor(m => m.TestAssignTypeId)
+         </td>
+         <td class="formValue">
+             @Html.TextBoxFor(m => m.TestEstimatedHours, new { @class = "form-control" })
+         </td>
+    </tr>
+    <tr>
+        <th class="formTitle">描述</th>
+        <td class="formValue" colspan="5">
+            <div id="divDitor" style="width:100%;height:100%">
+                <script id="TaskDescriptionEditor" name="TaskDescriptionEditor" type="text/plain">
+                </script>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<script src="~/Content/js/ueditor/ueditor.config.js"></script>
+<script src="~/Content/js/ueditor/ueditor.all.js"></script>
+<script src="~/Content/js/base64/base64.js"></script>
+
+<script type="text/javascript">
+    var editor;
+    (function ($) {
+        $(function () {
+            $("#ProjectId").bindSelect();
+            $("#TaskPriority").bindSelect();
+            $("#TaskCategory").bindSelect();
+            $("#DevUserId").bindSelect();
+            $("#TestUserId").bindSelect();
+            $("#TaskStatus").bindSelect();
+            $("#ReviewUserId").bindSelect();
+            var width = $("#widthFlag").width();
+            var options = {
+                toolbars: [
+                    ['source', 'undo', 'redo', 'paragraph', 'fontfamily', 'fontsize', 'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'blockquote', 'pasteplain', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist']],
+                autoHeightEnabled: true,
+                autoFloatEnabled: true,
+                initialFrameWidth: width+10,
+                initialFrameHeight: 200
+            };
+            editor = new UE.ui.Editor(options);
+            editor.render("TaskDescriptionEditor");
+            editor.addListener("ready", function () {
+                var TaskId = "@Model.TaskId";
+                if (TaskId.length>0) {
+                    getDescription(TaskId);
+                }
+            });
+        });
+
+
+
+        function getDescription(TaskId) {
+            $.ajax({
+                url: "@Url.Action("GetDescription")",
+                data: { TaskId: TaskId },
+                dataType: 'json',
+                type: "post",
+                success: function (result) {
+                    if (result.TaskDescription != null) {
+                        editor.setContent(result.TaskDescription);
+                    }
+                    else {
+                        editor.setContent('');
+                    }
+                },
+                error: function (a, b, c) {
+                    console.log("error");
+                }
+            })
+            @*console.log('@Model.TaskDescription');
+            editor.setContent('@Model.TaskDescription');*@
+        }
+
+    })($);
+
+</script>

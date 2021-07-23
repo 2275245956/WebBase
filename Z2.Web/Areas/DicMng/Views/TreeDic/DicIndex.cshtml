@@ -1,0 +1,168 @@
+﻿@model Z2.Core.WebApp.Model.SysItemCategory
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+<script>
+
+    function reloadGrid() {
+        var $gridList = $("#gridList");
+        $gridList.resetSelection();
+        $gridList.jqGrid('setGridParam', {
+            postData: { keyword: $("#txt_keyword").val() },
+        }).trigger('reloadGrid');
+    }
+
+    $(function () {
+        gridList();
+
+        function gridList() {
+            var $gridList = $("#gridList");
+            $gridList.dataGrid({
+                treeGrid: true,
+                treeGridModel: "adjacency",
+                type: "Get",
+                url: '@Url.Action("GetTreeGridArea")',
+                colModel: [
+                    { label: "主键", name: "Id", hidden: true, key: true, },
+                    { label: '名称', name: 'ItemName', width: 150, align: 'left' },
+                    { label: '编号', name: 'ItemCode', width: 150, align: 'left' },
+                    { label: "备注", name: "Description", width: 200, align: "left" }
+                ],
+                rownumbers: true,
+                rownumWidth: 50
+            });
+        }
+
+        $("#btn_search").click(function () {
+            reloadGrid();
+        });
+    });
+    
+    
+
+    $(function () {
+        $("#btnCreate").click(btnCreate_onClick);
+        function btnCreate_onClick() {
+            var itemId = '@Model.CategoryCode';
+            var itemName = '@Model.CategoryName';
+            if (!itemId) {
+                return false;
+            }
+            $.modalOpen({
+                id: "Form",
+                title: "新增" + itemName,
+                url: '@Url.Action("Form")',
+                width: "450px",
+                height: "450px",
+                callBack: function (iframeId) {
+                    top.frames[iframeId].submitForm();
+                }
+            });
+        }
+    });
+    
+    $(function () {
+        $("#btnExport").click(btnExport_onClick);
+        function btnExport_onClick() {
+            var url = '@Url.Action("Export")';
+            var postData = { keyword: $("#txt_keyword").val() }
+            window.location.href = url + "?" + $.param(postData);
+        }
+    });
+    
+
+    $(function () {
+        $("#btnEdit").click(btnEdit_onClick);
+        function btnEdit_onClick() {
+            var itemName = '@Model.CategoryName';
+            var keyValue = $("#gridList").jqGridRowValue().Id;
+            if (keyValue == null) {
+                $.modalMsg('未选择数据', 'error');
+                return;
+            }
+            $.modalOpen({
+                id: "Form",
+                title: "修改" + itemName,
+                url: '@Url.Action("Form")' + '?keyValue=' + keyValue,
+                width: "450px",
+                height: "450px",
+                callBack: function (iframeId) {
+                    top.frames[iframeId].submitForm();
+                }
+            });
+        }
+    });
+    
+
+    $(function () {
+        $("#btnDelete").click(btnDelete_onClick);
+
+        function btnDelete_onClick() {
+            var keyValue = $("#gridList").jqGridRowValue().Id;
+            if (keyValue == null) {
+                $.modalMsg('未选择数据', 'error');
+                return;
+            }
+            $.deleteForm({
+                url: "@Url.Action("DeleteForm")",
+                param: { keyValue: keyValue },
+                success: function () {
+                    reloadGrid();
+                }
+            })
+        }
+    });
+
+    $(function () {
+
+        $("#btnDetail").click(btnDetail_onClick);
+        function btnDetail_onClick() {
+            var keyValue = $("#gridList").jqGridRowValue().Id;
+            if (keyValue == null) {
+                $.modalMsg('未选择数据', 'error');
+                return;
+            }
+
+            $.modalOpen({
+                id: "Details",
+                title: "查看字典",
+                url: '@Url.Action("Details")' + '?keyValue=' + keyValue,
+                width: "450px",
+                height: "420px",
+                btn: [ '关闭'],
+                btnclass: ['btn btn-danger'],
+               callBack: function (iframeId) {
+                    top.frames[iframeId].submitForm();
+                }
+            });
+        }
+    });
+
+
+</script>
+
+<div class="topPanel">
+    <div class="toolbar">
+        @Html.Partial("~/Views/Shared/_Partial_LoadButtons.cshtml")
+    </div>
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <input id="txt_keyword" type="text" class="form-control" placeholder="名称/编号" style="width: 200px;">
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>
+

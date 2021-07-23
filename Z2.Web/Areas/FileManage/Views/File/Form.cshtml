@@ -1,0 +1,156 @@
+﻿@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+<script src="~/Content/js/UploadFile/ajaxfileupload.js"></script>
+<script>
+    var keyValue = $.request("keyValue");
+    $(function () {
+        $("#OrgFileName").attr("readonly", "readonly");
+        if (!!keyValue) {
+            $(".fileEle").remove();
+            $.ajax({
+                url: "/FileManage/File/GetFormJson",
+                data: { keyValue: keyValue },
+                dataType: "json",
+                type: 'post',
+                async: false,
+                success: function (result) {
+                    $("#form1").formSerialize(result);
+                    $("#EnabledFlag").attr("readonly", "readonly");
+                    $("#form1").find(".ckbox label").attr("for", "");
+                    $("#OrgFileName").removeAttr("readonly");
+                }
+            });
+        }
+    })
+    function submitForm() {
+        if (!$("#form1").formValid()) {
+            return false;
+        }
+        var fileData = $("#upFile");
+        var filePath = fileData[0].value;
+        var fileEntity = $("#form1").formSerialize();
+        var keyValue = $("#FileID").val();
+        var fileId = $("#upFile").attr("id");
+        var url = "/FileManage/File/UploadFile";
+        var sendData = {
+            FileID: keyValue,
+            OrgFilePath: filePath,
+            Description: fileEntity.Description,
+            EnabledFlag: fileEntity.EnabledFlag,
+        }
+        ajaxFileUpload(fileId, url, sendData);
+    }
+    function ajaxFileUpload(elementId, url, sendData) {
+        var obj = {
+            url: url,
+            secureuri: false,
+            fileElementId: elementId,
+            dataType: 'JSON',
+            type:'POST',
+            data: sendData,
+            success: function (result)  //服务器成功响应处理函数
+            {
+                $.currentWindow().$("#gridList").resetSelection();
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+                $.modalClose();
+            },
+            error: function (data, status, e) {
+                console.log("error");
+            }
+        };
+        $.ajaxFileUpload(obj);
+        return false;
+    }
+    function unloadFile(file) {
+        var fileName = file.files[0].name;
+        var fileType = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+        var fileTypeArr = [".gif", ".jpg", ".bmp", ".png", ".rar", ".zip", ".doc", ".docx", ".xls", ".xlsx", ".txt", ".mp3", ".cshtml", ".rdlx"];
+        if (fileTypeArr.indexOf(fileType) != -1) {
+            $("#OrgFileName").attr("value", fileName);
+        }
+        else {
+            alert("只允许上传" + fileTypeArr + "类型的文件。");
+        }
+    }
+
+</script>
+<style>
+    .fileWidth {
+        width: 100%;
+    }
+    .Des{
+        height:80px;
+    }
+    .FileSelectHide {
+        width: 80px;
+        height: 32px;
+        overflow: hidden;
+        position: relative;
+        background-image: none;
+        background-attachment: scroll;
+        background-repeat: no-repeat;
+        background-position-x: center;
+        background-position-y: center;
+        background-size: auto;
+        background-origin: padding-box;
+        background-clip: border-box;
+        background-color: transparent;
+        margin-top: -34px;
+    }
+        .FileSelectHide input {
+            height: 34px;
+            right: 0px;
+            bottom: 0px;
+            font-size: 20px;
+            filter: alpha(opacity=0);
+            -webkit-filter: opacity(0%);
+            position: absolute;
+            cursor: pointer;
+            outline-width: medium;
+            outline-style: none;
+            outline-color: invert;
+            opacity: 0;
+        }
+</style>
+<form id="form1">
+    <div style="margin-top:10px;margin-left:10px;">
+        <div style="padding-top:20px;margin-right:30px;">
+            <ul class="nav nav-tabs">
+                <li role="presentation" class="active"><a href="#">基本信息</a></li>
+            </ul>
+            <table class="form">
+                <tr>
+                    <td hidden>
+                        <input type="text" id="FileID" name="FileID" />
+                    </td>
+                    <th class="formTitle">文件名</th>
+                    <td class="formValue">
+                        <input type="text" id="OrgFileName" name="OrgFileName" class="form-control fileWidth" />
+                    </td>
+                    <td class="formValue fileEle">
+                        <input type="button" value="选择文件" id="btnFileSelect" class="btn btn-primary" />
+                        <div class="FileSelectHide">
+                            <input id="upFile" name="upFile" type="file" class="addFile" onchange="unloadFile(this)" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">选项</th>
+                    <td class="formValue" colspan="2">
+                        <div class="ckbox">
+                            <input id="EnabledFlag" name="EnabledFlag" type="checkbox" /><label for="EnabledFlag">有效</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">备注</th>
+                    <td class="formValue" colspan="2">
+                        <textarea id="Description" name="Description" class="Des form-control"></textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>

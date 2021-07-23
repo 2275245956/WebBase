@@ -1,0 +1,176 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+<script>
+    $(function () {
+        gridList();
+    })
+    function gridList() {
+        var $gridList = $("#gridList");
+        $gridList.dataGrid({
+            treeGrid: true,
+            treeGridModel: "adjacency",
+            ExpandColumn: "UrlAddress",
+            url: '@Url.Action("GetTreeGridJson")',//"/SystemManage/Module/GetTreeGridJson",
+            height: $(window).height() - 96,
+            colModel: [
+                { label: "@Resources.BaseRes.PrimaryKey", name: "Id", hidden: true, key: true },
+                { label: '@Resources.BaseRes.Name', name: 'Name', width: 200, align: 'left' },
+                { label: '@Resources.BaseRes.Mudule_UrlAddress', name: 'UrlAddress', width: 260, align: 'left' },
+                {
+                    label: '@Resources.BaseRes.Mudule_Target', name: 'Target', width: 80, align: 'center',
+                    formatter: function (cellvalue) {
+                        if (cellvalue == "expand") {
+                            return "@Resources.BaseRes.Mudule_NoPage";
+                        } else if (cellvalue == "iframe") {
+                            return "@Resources.BaseRes.Mudule_FramePage";
+                        } else if (cellvalue == "open") {
+                            return "@Resources.BaseRes.Mudule_PopUpPage";
+                        } else if (cellvalue == "blank") {
+                            return "@Resources.BaseRes.Mudule_NewWindow";
+                        }
+                    }
+                },
+                {
+                    label: "@Resources.BaseRes.Module_Menu", name: "IsMenu", width: 60, align: "center",
+                    formatter: function (cellvalue) {
+                        return cellvalue == true ? "<i class=\"fa fa-toggle-on\"></i>" : "<i class=\"fa fa-toggle-off\"></i>";
+                    }
+                },
+                {
+                    label: "@Resources.BaseRes.Module_Expand", name: "IsExpand", width: 60, align: "center",
+                    formatter: function (cellvalue) {
+                        return cellvalue == true ? "<i class=\"fa fa-toggle-on\"></i>" : "<i class=\"fa fa-toggle-off\"></i>";
+                    }
+                },
+                {
+                    label: "@Resources.BaseRes.Module_Public", name: "IsPublic", width: 60, align: "center",
+                    formatter: function (cellvalue) {
+                        return cellvalue == true ? "<i class=\"fa fa-toggle-on\"></i>" : "<i class=\"fa fa-toggle-off\"></i>";
+                    }
+                },
+                {
+                    label: "@Resources.BaseRes.EnabledFlag", name: "EnabledFlag", width: 60, align: "center",
+                    formatter: function (cellvalue) {
+                        return cellvalue == 1 ? "<i class=\"fa fa-toggle-on\"></i>" : "<i class=\"fa fa-toggle-off\"></i>";
+                    }
+                },
+                { label: '@Resources.BaseRes.Description', name: 'Description', width: 300, align: 'left' }
+            ]
+        });
+        $("#btn_search").click(function () {
+            $gridList.jqGrid('setGridParam', {
+                postData: { keyword: $("#txt_keyword").val() },
+            }).trigger('reloadGrid');
+        });
+    }
+    function btn_add() {
+        $.modalOpen({
+            id: "Form",
+            title: "@Resources.BaseRes.Create",
+            url: '@Url.Action("Form")',//"/SystemManage/Module/Form",
+            width: "700px",
+            height: "440px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+            }
+        });
+    }
+    function btn_edit() {
+        var keyValue = $("#gridList").jqGridRowValue().Id;
+        $.modalOpen({
+            id: "Form",
+            title: "@Resources.BaseRes.Edit",
+            url: '@Url.Action("Form")' + '?keyValue=' + keyValue,//"/SystemManage/Module/Form?keyValue=" + keyValue,
+            width: "700px",
+            height: "440px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+            }
+        });
+    }
+    function btn_delete() {
+        $.deleteForm({
+            url: '@Url.Action("DeleteForm")',//"/SystemManage/Module/DeleteForm",
+            param: { keyValue: $("#gridList").jqGridRowValue().Id },
+            success: function () {
+                $.currentWindow().$("#gridList").resetSelection();
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+            }
+        })
+    }
+    function btn_details() {
+        var keyValue = $("#gridList").jqGridRowValue().Id;
+        $.modalOpen({
+            id: "Details",
+            title: "@Resources.BaseRes.Details",
+            url: '@Url.Action("Details")' + '?keyValue=' + keyValue,//"/SystemManage/Module/Details?keyValue=" + keyValue,
+            width: "700px",
+            height: "490px",
+            btn: null,
+        });
+    }
+    function btn_addOpcode() {
+        var keyValue = $("#gridList").jqGridRowValue().Id;
+        $.modalOpen({
+            id: "addOpcode",
+            title: "@Resources.BaseRes.Mudule_CreateOpCode",
+            url: '@Url.Action("addOpcode")' + '?moduleId=' + keyValue,//"/SystemManage/Module/addOpcode?moduleId=" + keyValue,
+            width: "950px",
+            height: "600px",
+        });
+    }
+    function btn_delOpcode() {
+        var keyValue = $("#gridList").jqGridRowValue().Id;
+        $.modalOpen({
+            id: "delOpcode",
+            title: "@Resources.BaseRes.Mudule_DeletOpCode",
+            url: '@Url.Action("delOpcode")' + '?moduleId=' + keyValue,//"/SystemManage/Module/delOpcode?moduleId=" + keyValue,
+            width: "950px",
+            height: "600px",
+        });
+    }
+</script>
+
+<div class="topPanel">
+    <div class="toolbar">
+        <div class="btn-group">
+            <a class="btn btn-primary" onclick="$.reload()"><span class="glyphicon glyphicon-refresh"></span></a>
+        </div>
+        <div class="btn-group">
+            <a id="NF-add" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_add()"><i class="fa fa-plus"></i>@Resources.BaseRes.Create</a>
+        </div>
+        <div class="operate">
+            <ul class="nav nav-pills">
+                <li class="first">@Resources.BaseRes.ItemSelected</li>
+                <li><a id="NF-edit" authorize="yes" onclick="btn_edit()"><i class="fa fa-pencil-square-o"></i>@Resources.BaseRes.Edit</a></li>
+                <li><a id="NF-delete" authorize="yes" onclick="btn_delete()"><i class="fa fa-trash-o"></i>@Resources.BaseRes.Delete</a></li>
+                <li><a id="NF-Details" authorize="yes" onclick="btn_details()"><i class="fa fa-search-plus"></i>@Resources.BaseRes.Details</a></li>
+                <li class="split"></li>
+                <li><a id="NF-modulebutton" authorize="yes" onclick="btn_addOpcode()"><i class="fa fa-plus"></i>@Resources.BaseRes.Mudule_CreateOpCode</a></li>
+                <li class="split"></li>
+                <li><a id="NF-modulebutton" authorize="yes" onclick="btn_delOpcode()"><i class="fa fa-trash"></i>@Resources.BaseRes.Mudule_DeletOpCode</a></li>
+            </ul>
+            <a href="javascript:;" class="close"></a>
+        </div>
+        @*<script>$('.toolbar').authorizeButton()</script>*@
+    </div>
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <input id="txt_keyword" type="text" class="form-control" placeholder="@Resources.BaseRes.KeyWord" style="width: 200px;">
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+</div>

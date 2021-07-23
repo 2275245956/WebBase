@@ -1,0 +1,99 @@
+﻿@{
+    ViewBag.Title = "test";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        getPageData();
+    });
+    function getPageData() {
+        var PageID="@ViewBag.Title";
+        $.ajax({
+            url: '@Url.Action("GetFormJson")',//"/SystemManage/PageConfigure/GetFormJson",
+            type: 'post',
+            data: { keyValue: PageID },
+            datatype:'json',
+            async:false,
+            success: function (result) {
+                var data=JSON.parse(result);
+                gridList(data);
+            },
+        });
+    }
+
+    function gridList(data) {
+        var colModels=[];
+        var colID=data.ColInfoID.split(",");
+        var colName=data.ColInfoName.split(",");
+        for (var i = 0; i < colID.length; i++) {
+            colModels.push({ label:colName[i],name:colID[i],index:colID[i],width:50,algin:'center',});
+        }
+        var $gridList = $("#gridList");
+        var _height = (!!window.ActiveXObject || "ActiveXObject" in window) ? 110 : 145;
+        $gridList.dataGrid({
+            datatype: "json",
+            url:data.Url,
+            height: $(window).height() - _height,
+            colModel:colModels,
+            //pager: "#gridPager",
+            //viewrecords: true,
+        });
+        $("#btn_search").click(function () {
+            $gridList.jqGrid('setGridParam', {
+                postData: { keyword: $("#txt_keyword").val() },
+            }).trigger('reloadGrid');
+        });
+    }
+    function reloadGrid() {
+        $("#gridList").resetSelection();
+
+        $("#gridList").trigger("reloadGrid");
+    }
+</script>
+
+
+
+<div class="topPanel">
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <input id="txt_keyword" type="text" class="form-control" placeholder="@Resources.BaseRes.KeyWord" style="width: 200px; ">
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="toolbar">
+        @*删除  修改 按钮*@
+        <div class="operate" style="clear:both">
+            <ul class="nav nav-pills">
+                <li class="first">@Resources.BaseRes.ItemSelected</li>
+                <li><a id="NF-edit" authorize="yes" onclick="btn_edit()"><i class="fa fa-pencil-square-o"></i>@Resources.BaseRes.Edit</a></li>
+                <li><a id="NF-delete" authorize="yes" onclick="btn_delete()"><i class="fa fa-trash-o"></i>@Resources.BaseRes.Delete</a></li>
+
+            </ul>
+            <a href="javascript:;" class="close"></a>
+        </div>
+
+        @*刷新按钮*@
+        <div class="btn-group">
+
+            <a class="btn btn-primary" onclick="$.reload()"><span class="glyphicon glyphicon-refresh"></span></a>
+        </div>
+        @*新建按钮*@
+        <div class="btn-group">
+            <a id="NF-add" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_add()"><i class="fa fa-plus"></i>@Resources.BaseRes.Create</a>
+        </div>
+    </div>
+
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>

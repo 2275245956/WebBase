@@ -1,0 +1,106 @@
+﻿@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+<style type="text/css">
+    .required {
+    }
+</style>
+<script>
+    var keyValue = $.request("keyValue");
+    $(function () {
+        if (!!keyValue) {
+            $.ajax({
+                url: '@Url.Action("GetFormJson")',//"/SystemManage/Office/GetFormJson",
+                type: 'post',
+                data: { keyValue: keyValue },
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    //时间格式转换 只保留yyyy-mm-dd
+                    data.StartDate = data.StartDate.toString().split(' ')[0];
+                    data.EndDate = data.EndDate.toString().split(' ')[0];
+                    $("#form1").formSerialize(data);
+                }
+            });
+        }
+
+    });
+
+    //窗体表单提交
+    function submitForm() {
+
+        var endDate = $('#EndDate').val();
+        var startDate = $('#StartDate').val();
+        if (endDate > startDate) {
+            if (!$('#form1').formValid()) {
+                return false;
+            }
+            var postData = $("#form1").formSerialize();
+            $.submitForm({
+                url: '@Url.Action("SubmitForm")' + '?keyValue=' + keyValue,//"/SystemManage/Office/SubmitForm?keyValue=" + keyValue,
+                param: postData,
+                success: function () {
+                    $.currentWindow().$("#gridList").trigger("reloadGrid");
+                }
+            });
+        } else {
+            alert("警告:结束时间必须大于开始时间");
+        }
+    }
+
+</script>
+<form id="form1">
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">@Resources.BaseRes.BaseInfo</a></li>
+        </ul>
+        <div style="padding-top: 10px; margin-right: 30px;">
+            <table class="form">
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Name</th>
+                    <td class="formValue">
+                        <input id="Name" name="Name" type="text" class="form-control required" style="width:95%" placeholder="@Resources.BaseRes.Input" />
+                    </td>
+
+                    <th class="formTitle">@Resources.BaseRes.EnCode</th>
+                    <td class="formValue">
+                        <input id="EnCode" name="EnCode" type="text" class="form-control required" style="width:95%" placeholder="@Resources.BaseRes.Input" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Office_StartTime</th>
+                    <td class="formValue">
+                        <input id="StartDate" name="StartDate" type="text" class="form-control required input-wdatepicker" style="width:95%" onfocus="WdatePicker()" />
+
+                    </td>
+
+                    <th class="formTitle">@Resources.BaseRes.Office_EndTime</th>
+                    <td class="formValue">
+                        <input id="EndDate" name="EndDate" type="text" class="form-control required input-wdatepicker" style="width:95%" onfocus="WdatePicker()" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle" style="height: 35px;">@Resources.BaseRes.Options</th>
+                    <td class="formValue" style="padding-top: 1px;">
+                        <div class="ckbox">
+                            <input id="EnabledFlag" name="EnabledFlag" type="checkbox" checked="" /><label for="EnabledFlag">@Resources.BaseRes.EnabledFlag</label>
+                        </div>
+                    </td>
+                    <th class="formTitle">@Resources.BaseRes.Sort</th>
+                    <td class="formValue">
+                        <input id="DisplayNo" name="DisplayNo" style="width:95%" type="text" class="form-control required" placeholder="@Resources.BaseRes.Input" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle" style="padding-top: 5px;">
+                        @Resources.BaseRes.Description
+                    </th>
+                    <td class="formValue" colspan="3">
+                        <textarea id="Description" name="Description" class="form-control" style="height: 60px; width:95%"></textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>

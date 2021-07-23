@@ -1,0 +1,255 @@
+﻿@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+<style type="text/css">
+    .required {
+    }
+</style>
+
+<script src="~/Content/js/ueditor/ueditor.config.js"></script>
+<script src="~/Content/js/ueditor/ueditor.all.js"></script>
+<script src="~/Content/js/ueditor/ueditor.parse.js"></script>
+<script src="~/Content/js/base64/base64.js"></script>
+<form id="form1">
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">任务信息</a></li>
+        </ul>
+        <div style="padding-top: 10px; margin-right: 30px;">
+            <table class="form">
+                <tr>
+                    <th class="formTitle">指派(描述)</th>
+                    <td class="formValue">
+                        @Html.DropDownList("TaskAssignId", (SelectList)ViewBag.TaskAssignTypeList, new { @class = "form-control" })
+                    </td>
+                    <th class="formTitle">user</th>
+                    <td class="formValue">
+                        @Html.DropDownList("AssignUserId", (SelectList)ViewBag.UserInfoList, new { @class = "form-control" ,@name="AssignUserId" })
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">任务状态</th>
+                    <td class="formValue">
+                        @*<input id="EstimatedHours" name="EstimatedHours" type="text" class="form-control " />*@
+                        @Html.DropDownList("TaskStatus", (SelectList)ViewBag.TaskStatusList, new { @class = "form-control" })
+                    </td>
+                    <th class="formTitle">进度(%)</th>
+                    <td class="formValue">
+                        <input id="TaskPercent" name="TaskPercent" type="text" class="form-control required" style="width:100%" value="0" />
+                    </td>
+
+                </tr>
+                <tr>
+                    <th class="formTitle">日期</th>
+                    <td class="formValue">
+                        <input id="Date" name="Date" type="text" class="form-control required input-wdatepicker" style="width:98%" onfocus="WdatePicker()" value="@string.Format("{0:yyyy-MM-dd}",DateTime.Now.Date)" />
+
+                    </td>
+
+                    <th class="formTitle">工时</th>
+                    <td class="formValue">
+                        <input id="ActualHours" name="ActualHours" type="text" class="form-control required" style="" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">对应内容</th>
+                    <td class="formValue" colspan="3">
+                        @*<textarea id="TaskContent" name="TaskContent" class="form-control" style="height: 120px; width:95%"></textarea>*@
+                        <div id="content_Div">
+                            <script id="ContentEditor" name="ContentEditor" type="text/plain">
+
+                            </script>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>
+<div id="hidelist" hidden>
+
+    @Html.DropDownList("ProcessResult", (SelectList)ViewBag.FileTypeList, new { @class = "form-control required", @Id = "FileTypeList" })
+
+    @Html.DropDownList("ProcessResult", (SelectList)ViewBag.ResultList, new { @class = "form-control required", @Id = "ResTypeList" })
+
+    @Html.DropDownList("ProcessResult", (SelectList)ViewBag.BugTypeList, new { @class = "form-control required", @Id = "BugTypeList" })
+
+    @Html.DropDownList("ProcessType", (SelectList)ViewBag.TaskDetailProcessTypeList, new { @class = "form-control", @Id = "ProcessType" })
+
+    @*<select id="nulllist" name="ProcessType" class="form-control required hidden" style="">
+        <option value="0" title="0" checked></option>
+    </select>*@
+</div>
+
+<script>
+    var editor;
+    var tskDelId = $.request("TaskDetailId");
+    var tskId = $.request("TaskId");
+    $(function () {
+        var width = $(".form tr").width();
+        var th = $(".form th").width();
+        var options = {
+            toolbars: [
+                [
+                    'source', 'undo', 'redo', 'paragraph', 'fontfamily', 'fontsize', 'bold', 'italic', 'underline',
+                    'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch',
+                    'blockquote', 'pasteplain', '|', 'forecolor', 'backcolor', 'insertorderedlist',
+                    'insertunorderedlist'
+                ]
+            ],
+            autoHeightEnabled: true,
+            autoFloatEnabled: true,
+            initialFrameWidth: width - th - 20,
+            initialFrameHeight: 200
+        };
+        editor = new UE.ui.Editor(options);
+        editor.render("ContentEditor");
+        //editor.addListener("ready", function () {
+        //    var TaskId = tskId;
+        //    if (TaskId) {
+        //        getDescription(TaskId);
+        //    }
+        //});
+
+    });
+
+    function getData() {
+        $.ajax({
+            url: "@Url.Action("GetFormJson", "TaskDetail")",
+            type: 'post',
+            data: {
+                TaskId: tskId,
+                TaskDetailId: tskDelId,
+                TaskAssignId:'@ViewBag.TaskAssignId',
+                AssignTypeId:'@ViewBag.AssignTypeId',
+                AssignTypeName:'@ViewBag.AssignTypeName',
+            },
+            dataType: "json",
+            async: false,
+            success: function (data) {
+                //时间格式转换 只保留yyyy-mm-dd
+                data.Date = data.Date.toString().split(' ')[0];
+                if (data.TaskContent) {
+                    $("#ContentEditor").append(data.TaskContent);
+                    uParse('#ContentEditor',
+                        {
+                            rootPath: '@Url.Content("~/Content/js/ueditor")'
+                        });
+                }
+
+                var type = data.AssignTypeId;
+                var value = data.ProcessResult;
+                autoChangeSelect(type, value);
+                //data.AssignUserId = "@ViewBag.AssignUserId";
+                $("#form1").formSerialize(data);
+            }
+
+
+
+        });
+    }
+
+    //改变右侧的下拉框
+    function switchesSelect(title, id, value) {
+
+        var tagerId = $("#" + id);
+        $("#resTitle").text(title);
+        $("#list").children("select").appendTo($("#hidelist"));
+        $("#list").empty();
+        $("#list").append(tagerId);
+        $("#hidelist select[id='" + id + "']").remove();
+        $("#" + id + " option[Value='" + value + "']").attr("selected", "selected");
+        tagerId.bindSelect();
+    }
+
+    //其他情况  不显示 下拉框
+    function hideSelect() {
+        $("#list").children("select").appendTo($("#hidelist"));
+        $("#list").empty();
+        $("#list").append($("#ProcessType"));
+        $("#resTitle").text("");
+
+    }
+    //下拉框Change
+    function autoChangeSelect(type, value) {
+        /*
+        Bug分析
+        返工
+        增加对应内容
+        文档
+        其他
+        开发
+        关闭
+        代码检查
+        测试
+        **/
+        if (type === "Architecture") {
+            switchesSelect("文档", "FileTypeList", value);
+
+        } else if (type === "AnalyzeBug") {
+            switchesSelect("Bug分析", "BugTypeList", value);
+
+        } else if (type == "Test" || type == "Review") {
+            switchesSelect("结果", "ResTypeList", value);
+        }
+        //else if (type == null || type == '') {
+        //    switchesSelect("类型", "ProcessType", value);
+        //}
+        else {
+            hideSelect();
+        }
+    }
+    //窗体表单提交
+    function submitForm() {
+        if (!$('#form1').formValid()) {
+            return false;
+        }
+        var postData = $("#form1").formSerialize();
+        postData.TaskContent = StringUtil.Base64Encode(editor.getContent());
+        postData.ProcessResult = $("#list select[name='ProcessResult'] option:checked").val();
+        $.submitForm({
+            url: "@Url.Action("SubmitForm","TaskDetail")?TaskDetailId=" + tskDelId + "&TaskId=" + tskId,
+            param: postData,
+            success: function () {
+                $.currentWindow().location.reload();
+                $.modalClose();
+            }
+        });
+
+    }
+
+    $(function () {
+        $(".form-control").attr("autocomplete", "off");
+        $("#TaskAssignId").change(function () {
+            var AssignId = $("#TaskAssignId option:selected").val();
+            $.ajax({
+                url: "@Url.Action("GetAssign", "TaskDetail")",
+                type: 'post',
+                data: { AssignId: AssignId },
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    var typeCode = data.AssignTypeCode;
+                    //$("#ProcessType").val(typeCode);
+                    $("#TaskPercent").val(data.AssignPercent);
+                    autoChangeSelect(typeCode, 0);
+                }
+            });
+            //var type = $("#TaskAssignId option:selected").text();
+            //console.log(type)
+            //autoChangeSelect(type, 0);
+
+        });
+        $("#AssignUserId").bindSelect();
+        $("#ProcessType").bindSelect();
+        $("#ProcessResult").bindSelect();
+        $("#TaskStatus").bindSelect();
+        $("#TaskAssignId").bindSelect();
+
+        if (tskId) {
+            getData();
+        }
+    });
+
+</script>

@@ -1,0 +1,175 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+<style type="text/css">
+    .gridPanel {
+    }
+</style>
+
+<div class="topPanel">
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <input id="txt_keyword" type="text" class="form-control" placeholder="@Resources.BaseRes.KeyWord" style="width: 200px; ">
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="toolbar">
+        @*范文强 2018/12/7  修改按钮加载方式  部分视图*@
+        @Html.Partial("~/Views/Shared/_Partial_LoadButtons.cshtml")
+        
+
+    </div>
+
+</div>
+<div class="gridPanel">
+        <table id="gridList"></table>
+
+        <div id="gridPager"></div>
+    <form id="form1" target="_blank">
+        <input type="hidden" name="Id" id="hideValue"/>
+    </form>
+</div>
+
+@section scripts{
+    <script>
+        $(function() {
+            gridList();
+            $("#btnRefresh").click(function() {
+                $.reload();
+            });
+            $("#btnCreate").click(btn_add);
+
+            $("#btnEdit").click(btn_edit);
+            $("#btnDelete").click(btn_delete);
+            $("#btnDesign").click(btn_design);
+
+
+        });
+
+        //刷新
+        function reloadGrid() {
+            $("#gridList").resetSelection();
+            $("#gridList").trigger("reloadGrid");
+        }
+
+        function gridList() {
+            var $gridList = $("#gridList");
+            ////初始化表格  添加表头信息  并绑定属性
+            $gridList.dataGrid({
+                url: '@Url.Action("GetLayoutList")',
+
+                colModel: [
+                    { label: "@Resources.BaseRes.PrimaryKey", name: "ID", hidden: true, key: true },
+                    { label: '@Resources.BaseRes.Name', name: 'LayoutName', width: 250, align: 'left' },
+                    { label: '@Resources.BaseRes.Description', name: 'Description', width: 1250, align: 'left' },
+                    {
+                        label: "@Resources.BaseRes.EnabledFlag",
+                        name: "EnabledFlag",
+                        width: 60,
+                        align: "center",
+                        formatter: function(cellvalue) {
+                            return cellvalue == 1
+                                ? "<i class=\"fa fa-toggle-on\"></i>"
+                                : "<i class=\"fa fa-toggle-off\"></i>";
+                        }
+                    },
+                    { label: '@Resources.BaseRes.Sort', name: 'DisplayNo', width: 60, align: 'center' }
+                ],
+                pager: "#gridPager",
+                sortname: 'DisplayNo',
+                forceFit: true,
+                viewrecords: true
+
+            });
+            //模糊查询
+            $("#btn_search").click(function() {
+                $gridList.jqGrid('setGridParam',
+                    {
+                        postData: { keyword: $("#txt_keyword").val() }
+                    }).trigger('reloadGrid');
+            });
+        }
+
+
+        //添加
+        function btn_add() {
+            $.modalOpen({
+                id: "Form",
+                title: "@Resources.BaseRes.Create",
+                url: '@Url.Action("Form")', //"/SystemManage/Office/Form",
+                width: "450px",
+                height: "380px",
+                callBack: function(iframeId) {
+                    top.frames[iframeId].submitForm();
+                }
+            });
+        }
+
+        //修改
+        function btn_edit() {
+            var keyValue = $("#gridList").jqGridRowValue().ID;
+            $.modalOpen({
+                id: "Form",
+                title: "@Resources.BaseRes.Edit",
+                url: '@Url.Action("Form")' + '?keyValue=' + keyValue,
+                width: "450px",
+                height: "380px",
+                callBack: function(iframeId) {
+                    top.frames[iframeId].submitForm();
+                    $.currentWindow().$("#gridList").trigger("reloadGrid");
+                }
+            });
+        }
+
+        //删除
+        function btn_delete() {
+            $.deleteForm({
+                url: '@Url.Action("Delete")',
+                param: { keyValue: $("#gridList").jqGridRowValue().ID },
+                success: function() {
+                    $.currentWindow().$("#gridList").resetSelection();
+                    $.currentWindow().$("#gridList").trigger("reloadGrid");
+                }
+            });
+        }
+
+        //设计
+        function btn_design() {
+            var keyValue = $("#gridList").jqGridRowValue().ID;
+        
+            var res = '@Url.RouteUrl("Default", new{ controller = "Home", action = "Design"})' + '?id=' + keyValue;
+            console.log(res);
+            $("#hideValue").val(keyValue);
+            $("#form1").attr("action", '@Url.RouteUrl("Default", new{ controller = "Home", action = "Design"})').submit();
+            @*$.modalOpen({
+                id: "Form",
+                title: "设计",
+                url: '@Url.Action("Design","Home")' + '?id=' + keyValue,
+                width: "90%",
+                height: "90%",
+                callBack: function (iframeId) {
+
+
+                }
+            });*@
+
+
+
+
+        }
+
+    </script>
+
+}
+

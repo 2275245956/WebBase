@@ -1,0 +1,255 @@
+﻿@using Z2.Core.Configs;
+@using Z2.Core.WebApp.Repository;
+@{
+    SysSettingRep settingRep = new SysSettingRep();
+    var sysLogo = settingRep.GetSetting("SysLogo", "");
+    var loginImg = settingRep.GetSetting("LoginImg", "");
+    var loginBackColor = settingRep.GetSetting("LoginBackColor", "");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Resources.BaseRes.FastDevPlatForm</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Content/js/jquery/jquery-2.1.1.min.js"></script>
+    <script src="~/Content/js/cookie/jquery.cookie.js"></script>
+    <script src="~/Content/js/md5/jquery.md5.js"></script>
+    <script src="~/Content/js/bootstrap/bootstrap.js"></script>
+    <style>
+        .loginDiv {
+            float: right;
+            margin-top: 62px;
+            height: 350px;
+            width: 400px;
+            background-color: white;
+            /*background-image:url("../../Areas/Mall/Controllers/BrandController.cs") ;*/
+            background-size: cover;
+            border-opacity: 0.5;
+            margin-right: 10px;
+            /*position: relative;*/
+            /*position:absolute;*/
+        }
+
+        .loginTable td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .linkLabel {
+            font-size: 14px;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        /*.linkLabel:link {
+                color: #ff0000;
+            }
+
+            .linkLabel:visited {
+                color: #ff0000;
+            }*/
+
+        .btnLogin {
+            width: 285px;
+            height: 40px;
+            background-color: rgb(255, 69, 17);
+            color: #ffffff;
+            border: 1px double #3a3c3e;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            font-family: Arial;
+        }
+
+            .btnLogin:hover {
+                cursor: pointer;
+                background-color: rgb(255, 120, 109);
+            }
+
+        .headerDiv {
+        }
+
+        .backDiv {
+            /*padding-top:10px;*/
+            /*padding-bottom:10px;*/
+        }
+
+        .Statement {
+            width: 100px;
+            height: 100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .span1 {
+            display: block;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    </style>
+
+    <script type="text/javascript">
+
+        var loginHelper = {
+            formMessage: function (msg) {
+                $('.login_tips').find('.tips_msg').remove();
+                $('.login_tips').append('<div class="tips_msg"><i class="fa fa-question-circle"></i>' + msg + '</div>');
+            },
+            login: function () {
+                var $username = $("#txt_account");
+                var $password = $("#txt_password");
+
+                if ($username.val() == "") {
+                    $username.focus();
+                    loginHelper.formMessage("@Resources.BaseRes.Input" + $username.attr('placeholder'));
+                    return false;
+                } else if ($password.val() == "") {
+                    $password.focus();
+                    loginHelper.formMessage("@Resources.BaseRes.Input" + $password.attr('placeholder'));
+                    return false;
+                }
+
+                $("#btnLogin").attr('disabled', 'disabled').val("loading...");
+                $.ajax({
+                    url: '@Url.Action("CheckLogin")' + '?isRemPwd=' + $("#rememberPwd").is(":checked"),
+                    data: { username: $.trim($username.val()), password: $.md5($.trim($password.val())) },
+                    type: "post",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.state == "success") {
+                            $("#btnLogin").val("@Resources.BaseRes.Login_LoginSuccess");
+                            window.setTimeout(function () {
+                                window.location.href = '@Url.Action("Index", "Home")';
+                            }, 500);
+                        } else {
+                            $("#btnLogin").removeAttr('disabled').val("@Resources.BaseRes.Login");
+                            loginHelper.formMessage(data.message);
+                        }
+                    }
+                });
+            }
+        };
+
+        $(function () {
+
+            $("#btnLogin").click(loginHelper.login);
+            //自动登陆
+            $.ajax({
+                url: '@Url.Action("AutoLoginCheck")',
+                type: "post",
+                dataType: "json",
+                success: function (data) {
+                    if (data != null) {
+                        if (data.state == "success") {
+                            $("#btnLogin").val("@Resources.BaseRes.Login_LoginSuccess");
+                            window.setTimeout(function () {
+                                window.location.href = '@Url.Action("Index", "Home")';
+                            },
+                                500);
+                        } else {
+                            $("#btnLogin").removeAttr('disabled').val("@Resources.BaseRes.Login");
+                            loginHelper.formMessage(data.message);
+                        }
+                    }
+
+                }
+            });
+
+
+        });
+        @*从服务器获取背景颜色*@
+        function getLoginColor() {
+            $.ajax({
+                url: '@Url.Action("GetHomeColor")',
+                type: 'Post',
+                data: null,
+                success: function (result) {
+                    var color = result;
+                    $(".backDiv").css("background-color", color);
+                }
+            });
+        }
+
+
+    </script>
+
+</head>
+
+<body>
+    <div class="headerDiv">
+        <div style="width:990px;margin: 10px auto;">
+            <img src="@sysLogo" style="height:60px" />
+            <label>@Resources.BaseRes.Login_Welcome</label>
+        </div>
+    </div>
+    <div class="backDiv" style="background-color: @loginBackColor">
+        <div style="height:475px;width:990px; background-image:url(@loginImg); background-size: cover;margin: 0 auto;position: relative; ">
+            <div class="loginDiv">
+                <div style="width:300px;margin: 0 auto;margin-top: 10px;">
+                    <div style="width:80px;margin: 0 auto;margin-top: 40px;">
+                        <h2 style="color: #ff0000;">@Resources.BaseRes.Login</h2>
+                    </div>
+                    <form>
+                        <table class="loginTable">
+                            <tr>
+                                <td>
+                                    <div style="float:left;margin-left:-15px">
+                                        <div class="col-lg-6">
+                                            <div class="input-group">
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-user"></span></button>
+                                                </span>
+                                                <input type="text" class="form-control" placeholder="@Resources.BaseRes.Login_UserName" id="txt_account" style="width:230px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="float:left;margin-left:-15px">
+                                        <div class="col-lg-6">
+                                            <div class="input-group">
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-lock"></span></button>
+                                                </span>
+                                                <input type="password" class="form-control" placeholder="@Resources.BaseRes.Login_Password" id="txt_password" style="width:230px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="float: left;">
+                                        <input type="checkbox" id="rememberPwd">@Resources.BaseRes.Login_RememberPwd
+                                    </div>
+                                    <div style="float: right;">
+                                        <a href="#" class="linkLabel">@Resources.BaseRes.Login_ForgetPwd</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center">
+                                    <div class="btnDiv">
+                                        <input type="button" value="@Resources.BaseRes.Login" class="btnLogin" id="btnLogin">
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                    <div class="login_tips"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="Statement">
+        <span class="span1" style="text-align:center">@ConfigWrap.GetValue("CopyRight")</span>
+    </div>
+</body>
+</html>

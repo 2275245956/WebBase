@@ -1,0 +1,89 @@
+﻿@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+<style type="text/css">
+    .required {
+    }
+</style>
+<script>
+    var keyValue = $.request("keyValue");
+    $(function () {
+        if (!!keyValue) {
+            $.ajax({
+                url: '@Url.Action("GetForm")',//"/SystemManage/Office/GetFormJson",
+                type: 'post',
+                data: { keyValue: keyValue },
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    $("#form1").formSerialize(data);
+                }
+            });
+        }
+
+    });
+
+    //窗体表单提交
+    function submitForm() {
+
+
+        var postData = $("#form1").formSerialize();
+        $.submitForm({
+            url: '@Url.Action("SubmitForm")' + '?keyValue=' + keyValue,//"/SystemManage/Office/SubmitForm?keyValue=" + keyValue,
+            param: postData,
+            success: function () {
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+            }
+        });
+
+    }
+
+</script>
+<form id="form1">
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">@Resources.BaseRes.BaseInfo</a></li>
+        </ul>
+        <div style="padding-top: 10px; margin-right: 30px;">
+            <table class="form">
+                @*名称*@
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Name</th>
+                    <td class="formValue">
+                        <input id="LayoutName" name="LayoutName" type="text" class="form-control required" placeholder="@Resources.BaseRes.Input" />
+                    </td>
+                  
+                </tr>
+                
+
+                @*选项*@
+                <tr>
+                    <th class="formTitle" style="height: 35px;">@Resources.BaseRes.Options</th>
+                    <td class="formValue">
+                        <div class="ckbox">
+                            <input id="EnabledFlag" name="EnabledFlag" type="checkbox" checked="checked"/><label for="EnabledFlag">@Resources.BaseRes.EnabledFlag</label>
+                        </div>
+                    </td>
+
+                </tr>
+                @*排序*@
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Sort</th>
+                    <td class="formValue">
+                        <input id="DisplayNo" name="DisplayNo" type="text" class="form-control" placeholder="@Resources.BaseRes.Input" />
+                    </td>
+                </tr>
+                @*描述*@
+                <tr>
+                    <th class="formTitle" style="padding-top: 5px;">
+                        @Resources.BaseRes.Description
+                    </th>
+                    <td class="formValue">
+                        <textarea id="Description" name="Description" class="form-control" style="height: 60px;width:96%"></textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,135 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+    
+}
+
+<style>
+
+</style>
+
+<div class="topPanel">
+    <div class="toolbar">
+
+        @*范文强 2018/12/7  修改按钮加载方式  部分视图*@
+        @Html.Partial("~/Views/Shared/_Partial_LoadButtons.cshtml")
+        @*<script>$('.toolbar').authorizeButton()</script>*@
+    </div>
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <label for="ProjectId">项目：</label>
+                </td>
+                <td style="width:100px;">
+                    @Html.DropDownList("ProjectId", (SelectList)ViewBag.ProjectList, new { @class = "form-control" })
+                </td>
+                <td>
+                    <label for="WorkerId" style="margin-left:5px;">指派：</label>
+                </td>
+                <td style="width:100px;">
+                    @Html.DropDownList("WorkerId", (SelectList)ViewBag.UserInfoList, new { @class = "form-control" })
+                </td>
+                <td>
+                    <label for="WorkerId" style="margin-left:5px;">期间：</label>
+                </td>
+                <td class="formValue" style="width:100px;">
+                    <input id="StartDate" type="text" class="form-control input-wdatepicker" style="width: 100px;height:15px;" value="@ViewBag.stratDate" onfocus="WdatePicker()">
+                    
+
+                </td>
+                <td class="formValue" style="width:100px;">
+
+                    <input id="EndDate" type="text" class="form-control input-wdatepicker" style="width: 100px;height:15px;" value="@ViewBag.endDate" onfocus="WdatePicker()">
+                </td>
+                <td>
+                    <div class="input-group">
+                        <button id="btn_search" type="button" class="btn  btn-primary" style="width:60px !important;margin-left:10px;"><i class="fa fa-search">检索</i></button>
+
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>
+
+@section scripts{
+    <script>
+        $(document).keydown(function (event) {
+            if (event.keyCode == 13) {
+                $("#btn_search").click();
+            }
+        });
+    </script>
+
+
+    <script>
+
+        $(function () {
+            MingXiHelper.loadGrid();
+            $("#ProjectId").bindSelect();
+            $("#WorkerId").bindSelect();
+
+            $("#btn_search").click(function () {
+                MingXiHelper.searchData();
+            });
+        });
+        var MingXiHelper = {
+            loadGrid: function () {
+                console.log("MingXiHelper->loadGrid");
+                debugger;
+                var url = '@Url.Action("LoadMingXiGrid")';
+                var  data = {
+                    projectId: $("#ProjectId").val(),//"3",
+                    workerId: $("#WorkerId").val(),//"6051F9FB-2641-4527-B33A-14AA121188EF",
+                    stratDate: $("#StartDate").val(),//"2019-2-1",
+                    endDate: $("#EndDate").val()//"2019-2-28"
+                };
+                $("#gridList").dataGrid({
+                    url: '@Url.Action("LoadMingXiGrid")',
+                    postData: data,
+                    pager: "#gridPager",
+                    //sortname: 'DateStr',
+                    viewrecords: true,
+                    sortable: false,
+                    colModel: [
+                        { label: 'TaskId', name: 'TaskId', hidden: true },
+                        { label: '项目', name: 'ProjectName', width: 150, fixed: true, align: 'left', sortable: false },
+                        { label: '指派和描述', name: 'TaskName', width: 150, fixed: true, align: 'left', sortable: false },
+                        //{ label: '日期', name: 'Date', width: 150, fixed: true, align: 'center', sortable: false },
+                        { label: '日期', name: 'DateStr', width: 150, fixed: true, align: 'center', sortable: false },
+                        { label: '工时(h)', name: 'ActualHours', width: 150, fixed: true, align: 'right', sortable: false },
+                        { label: '进度(%)', name: 'AssignPercent', width: 150, fixed: true, align: 'right', sortable: false },
+                    ],
+                    gridComplete: function () {
+                    }
+                });
+            },
+            reloadGrid: function () {
+                
+                $("#gridList").resetSelection();
+                $("#gridList").trigger("reloadGrid");
+            },
+            searchData: function () {
+                
+                var postData = {
+                    projectId: $("#ProjectId").val(),
+                    workerId: $("#WorkerId").val(),
+                    stratDate: $("#StartDate").val(),
+                    endDate: $("#EndDate").val()
+                }
+                $("#gridList").jqGrid('setGridParam', {
+                    datatype: 'json',
+                    postData: postData,
+                }, true).trigger("reloadGrid");
+            }
+        }
+    </script>
+}
+
+
+

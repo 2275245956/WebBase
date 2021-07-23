@@ -1,0 +1,157 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutIndex.cshtml";
+}
+<script>
+    $(function () {
+        var myLayout = $('#layout').layout();
+        myLayout.sizePane("west", 400);
+        myLayout.sizePane("east", 350);
+        roleGridList();
+        moduleGridList();
+
+    })
+    function roleGridList() {
+        var $roleGridList = $("#roleGridList");
+        $roleGridList.dataGrid({
+            url: '@Url.Action("GetTreeGridJson", "Role")',//"/SystemManage/Role/GetTreeGridJson",
+            height: $(window).height() - 86,
+
+            colModel: [
+                { label: "@Resources.BaseRes.PrimaryKey", name: "Id", hidden: true, key: true },
+                { label: '@Resources.BaseRes.Name', name: 'Name', width: 150, align: 'left' },
+                { label: '@Resources.BaseRes.EnCode', name: 'EnCode', width: 150, align: 'left' },
+            ]
+        });
+    }
+    function moduleGridList() {
+        var $moduleGridList = $("#moduleGridList");
+        $moduleGridList.dataGrid({
+            treeGrid: true,
+            treeGridModel: "adjacency",
+            rownumbers: true,
+            rownumWidth: 50,
+
+            ExpandColumn: "UrlAddress",
+            url: '@Url.Action("GetTreeGridJson", "Module")',//"/SystemManage/Module/GetTreeGridJson",
+            height: $(window).height() - 86,
+            colModel: [
+                { label: "@Resources.BaseRes.PrimaryKey", name: "Id", hidden: true, key: true },
+                { label: '@Resources.BaseRes.Name.', name: 'Name', width: 200, align: 'left' },
+            ],
+            onSelectRow: function (rowid) {
+                var roleValue = $("#roleGridList").jqGridRowValue().Id;
+                var moduleValue = $("#moduleGridList").jqGridRowValue().Id;
+                opCodeList(roleValue);
+                $("#opCodeList").jqGrid("setGridParam", {
+                    postData: { roleValue: roleValue, moduleValue: moduleValue },
+                }).trigger("reloadGrid");
+            }
+        });
+    }
+    function opCodeList(roleValue) {
+        var $opCodeList = $("#opCodeList");
+        var moduleValue = $("#moduleGridList").jqGridRowValue().Id;
+        $opCodeList.dataGrid({
+            url: '@Url.Action("GetOperateDataJson")',//"/SystemManage/RoleModule/GetOperateDataJson",
+            height: $(window).height() - 86,
+            dataType: 'JSON',
+            rownumWidth: 33,
+
+            postData: { roleValue: roleValue, moduleValue: moduleValue },
+            colModel: [
+                {
+                    label: "@Resources.BaseRes.Options", sortable: false, name: "AuthId", width: 50, align: 'center',
+                    formatter: function (cellvalue, options, rowObject) {
+                        if (cellvalue != null && cellvalue != "") {
+                            return "<input type='checkbox' checked='checked' class='checkBox' keyCode='" + rowObject.KeyCode
+                                + "' Name='" + rowObject.Name
+                                + "' Icon='" + rowObject.Icon
+                                + "'Sort='" + rowObject.Sort + "'>";
+                        }
+                        else {
+                            return "<input type='checkbox' class='checkBox'keyCode='" + rowObject.KeyCode
+                                + "' Name='" + rowObject.Name
+                                + "' Icon='" + rowObject.Icon
+                                 + "'Sort='" + rowObject.Sort + "'>";
+                        }
+                    }
+                },
+                { label: '@Resources.BaseRes.Name', name: 'Name', width: 80, align: 'left' },
+                { label: '@Resources.BaseRes.OptionCode', name: 'KeyCode', width: 80, align: 'left' },
+                {
+                    label: '@Resources.BaseRes.Module_Icon', name: 'Icon', width: 80, align: 'center',
+                    formatter: function (cellvalue) {
+                        return cellvalue == null ? "<i class='fa fa-gears'></i>" : "<i class='" + cellvalue + "'></i>";
+                    }
+                },
+            ],
+        })
+    }
+    function btn_save() {
+        var roleValue = $("#roleGridList").jqGridRowValue().Id;
+        var moduleValue = $("#moduleGridList").jqGridRowValue().Id;
+
+        var dataList = $(".checkBox:checked");
+        var keyCodeList = [];
+        for (var i = 0; i < dataList.length; i++) {
+            var keyCode = $(dataList[i]).attr("KeyCode");
+            var Name = $(dataList[i]).attr("Name");
+            var operIcons = $(dataList[i]).attr("Icon");
+            var Sort = $(dataList[i]).attr("Sort");
+            var rowData = {
+                KeyCode: keyCode,
+                Icon: operIcons,
+                Name: Name,
+                Sort: Sort
+            }
+            keyCodeList.push(rowData);
+        }
+
+        var roleAuthorize = {
+            roleValue: roleValue,
+            moduleValue: moduleValue,
+            roleAuthorizeEntity: keyCodeList,
+
+        }
+        $.submitForm({
+            url: '@Url.Action("SaveRoleAuthorize")',//"/SystemManage/RoleModule/SaveRoleAuthorize",
+            param: roleAuthorize,
+            type: 'post',
+            success: function () {
+                $.currentWindow().$("#opCodeList").trigger("reloadGrid");
+            }
+        })
+    }
+</script>
+
+<style>
+
+</style>
+<div class="topPanel">
+    @*范文强 2018/12/06  修改  保存设置按钮*@
+    <div class="toolbar">
+        <a class="btn btn-primary" onclick="$.reload()"><span class="glyphicon glyphicon-refresh"></span></a>
+        <a id="NF-Details" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_save()"><i class="fa fa-save"></i>@Resources.BaseRes.Save</a>
+    </div>
+    @*修改结束*@
+</div>
+<div class="ui-layout" id="layout" style="height: 100%; width: 100%;">
+    <div class="ui-layout-west" id="west" style="width:25% !important">
+        <div class="roleGridPanel">
+            <table id="roleGridList"></table>
+        </div>
+    </div>
+    <div class="ui-layout-center" id="center" style="width:50% !important">
+        <div class="moduleGridPanel">
+            <table id="moduleGridList"></table>
+        </div>
+    </div>
+    <div class="ui-layout-east" id="east" style="width:25% !important">
+
+        <div class="opGridPanel">
+            <table id="opCodeList"></table>
+        </div>
+    </div>
+</div>

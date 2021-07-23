@@ -1,0 +1,243 @@
+﻿
+@{
+    ViewBag.Title = "FocusOnReply";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+<style type="text/css">
+    .div_warring {
+        height: 40px !important;
+        width: 100% !important;
+        background-color: #f8f8d8 !important;
+        border-bottom: 1px solid #fcdea7 !important;
+        border-top: 1px solid #fcdea7 !important;
+        position: relative !important;
+        margin-top: 15px !important;
+        vertical-align: middle !important;
+    }
+
+    .msgContainer {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .msgType {
+        margin: 10px 0 0 180px;
+        border: none;
+        height: 40px;
+        width: 100%;
+        font-size: 16px;
+    }
+
+    .msgContent {
+        height: 370px;
+        width: 350px;
+    }
+
+    .types {
+        float: left;
+        border: none;
+        height: 38px;
+        width: 100px;
+    }
+
+    .msg {
+        margin: 0 0 0 180px;
+        border: none;
+        height: auto;
+        width: 100%;
+        font-size: 16px;
+    }
+
+
+    .picAndMsgContainer {
+        margin: 0 0 0 260px;
+        border: none;
+        height: auto;
+        width: 100%;
+    }
+
+    .msgList {
+        margin-top: 15px;
+        border: 1px solid #008b8b;
+        height: 40px;
+        width: 100%;
+    }
+
+    .voiceContainer {
+        margin: 0 0 0 260px;
+        border: 1px solid red;
+        height: 370px;
+        width: 100%;
+        font-size: 16px;
+    }
+
+    .music div {
+        height: 40px;
+        float: left;
+    }
+
+    .saveInfo {
+        margin: 15px 0 0 15px;
+
+    }
+</style>
+<form id="form1">
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px; border-left: 1px solid #ddd; border-bottom: 1px solid #ddd;height: 540px">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">关注时回复</a></li>
+        </ul>
+        <div style="padding-top: 10px; margin-right: 30px;">
+            <div class="div_warring">
+                <div style="margin:13px 0 0 10px ">
+                    <i class="fa fa-warning"></i>只能选择一个！
+                </div>
+            </div>
+
+            <div class="msgType">
+
+                <div class="types"><span>类型</span></div>
+                <div class="types"><input type="radio" name="msgtype" checked value="0" />&nbsp;&nbsp;<i class="fa fa-file-text-o"></i>&nbsp;文本</div>
+                <div class="types"><input type="radio" name="msgtype" value="1" />&nbsp;&nbsp;<i class="fa fa-picture-o"></i>&nbsp;图文</div>
+                <div class="types"><input type="radio" name="msgtype" value="2" />&nbsp;&nbsp;<i class="fa fa-volume-up"></i>&nbsp;语音</div>
+
+            </div>
+            <div class="msgContainer">
+                <div class="msg">
+                    <div style="float: left">
+                        <span>内容</span>
+                    </div>
+                    <div style="float: left;margin-left: 50px">
+                        <textarea class="msgContent"></textarea>&nbsp;<span style="color: #b6b6b6;font-size: 13px">*&nbsp;&nbsp;最多1000个字符！</span>
+                    </div>
+
+
+                </div>
+
+            </div>
+
+            <div class="picAndMsgContainer">
+                <div class="addPic"><a authorize="yes" class="btn btn-primary dropdown-text" onclick=""><i class="fa fa-plus"></i>&nbsp;新  建</a></div>
+                @*<table id="gridList"></table>*@
+                <div class="msgList">
+                    图文消息列表
+                </div>
+            </div>
+
+            <div class="voiceContainer">
+
+                添加音乐信息
+                @*<div class="music">
+                        <div style="float: left">
+                            <span>音乐标题</span>
+                            <div style="float: left;margin-left: 150px">
+                                <input type="text" name="musTitle" />
+                            </div>
+                        </div>
+
+                        <br>
+                        <div style="float: left">
+                            <span>音乐链接</span>
+                            <div style="float: left;margin-left: 150px">
+                                <input type="file" name="muslink" />
+                            </div>
+                        </div>
+
+                        <br>
+                        <div style="float: left">
+                            <span>音乐描述</span>
+                            <div style="float: left;margin-left: 150px">
+                                <input type="text" name="musDesc" />
+                            </div>
+                        </div>
+                    </div>*@
+            </div>
+
+        </div>
+    </div>
+
+    <div class="saveInfo">
+        <a authorize="yes" class="btn btn-primary dropdown-text"><i class="fa fa-save"></i>&nbsp;保 存</a>
+    </div>
+
+
+</form>
+<script>
+    $(function () {
+
+        //var keyValue = $.request("keyValue");
+        var keyValue = "71B42614-4F12-46F3-B6D4-3F7B571DA4C6";  //测试Wid(WxName=范文强Test)
+        var wid = keyValue;
+
+
+        $(".msgContainer").show();
+        $(".picAndMsgContainer").hide();
+        $(".voiceContainer").hide();
+
+
+
+        $("input[name='msgtype']").click(function () {
+        
+            switch ($(this).val()) {
+                case "0":              //文本
+                    $(".msgContainer").show();
+                    $(".picAndMsgContainer").hide();
+                    $(".voiceContainer").hide();
+                   break;
+                case "1":              //图文
+                    $(".picAndMsgContainer").show();
+                    $(".msgContainer").hide();
+                    $(".voiceContainer").hide();
+                     break;
+                case "2":              //语音
+                    $(".voiceContainer").show();
+                    $(".picAndMsgContainer").hide();
+                    $(".msgContainer").hide();
+                    break;
+                default:               //默认为文本
+                    $(".msgContainer").show();
+                    $(".picAndMsgContainer").hide();
+                    $(".voiceContainer").hide();
+                     break;
+            }
+
+
+        });
+
+
+        $(".saveInfo a").click(function() {
+            
+            var replyType = $('input:radio[name="msgtype"]:checked').val();
+            var sendData = {};
+            if (replyType == "0") {//文本
+                sendData = {
+                    RuleContent: $(".msgContent").val(),
+                    Wid: wid,
+                    RuleType: 0,
+                    ReplyType: replyType
+                };
+                    $.ajax({
+                        data: sendData,
+                        type: 'post',
+                        url: "/WeChat/FocusResp/SubmitForm",
+                        dataType: "Json",
+                        success: function (result) {
+
+                        }
+
+
+                    });
+                } else if (replyType == "1") {//图文
+
+                } else if (replyType == "2") {//语音
+
+                }
+
+          
+        });
+    
+
+     
+    });
+</script>

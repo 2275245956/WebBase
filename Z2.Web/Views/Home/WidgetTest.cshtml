@@ -1,0 +1,222 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>WidgetTest</title>
+    <link href="~/Content/css/framework-font.css" rel="stylesheet" />
+    <link href="~/Content/css/framework-ui.css" rel="stylesheet" />
+    <script src="~/Content/js/jquery/jquery-2.1.1.min.js"></script>
+    <link href="~/Content/css/framework-theme.css" rel="stylesheet" />
+    <link href="~/Content/js/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Content/bootstrap/js/bootstrap.min.js"></script>
+    <link href="~/Content/css/framework-theme.css" rel="stylesheet" />
+    <link href="~/Content/css/framework-ui.css" rel="stylesheet" />
+    <script src="~/Content/js/framework-ui.js"></script>
+
+</head>
+<body>
+    <!-- #region 原始的首页布局 -->
+     <div id="areascontent" style="padding-top:10px;">
+            <div class="rows" style="overflow: hidden;">
+                <div style="float: left; width: 33%; margin-right: 1%;">
+                    <div style="height: 265px; border: 1px solid #e6e6e6; background-color: #fff;">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <i class="fa fa-rss fa-lg" style="padding-right: 5px;"></i>待处理1
+                                    </div>
+                                    <div class="col-md-2" style="text-align:right;">
+                                        <div id="fat-menu" class="dropdown">
+                                            <a id="drop3" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                                编辑<span class="caret"></span>
+                                            </a>
+                                            <ul class="dropdown-menu" aria-labelledby="drop3">
+                                                <li><a href="#">Action</a></li>
+                                                <li><a href="#">Another action</a></li>
+                                                <li><a href="#">Something else here</a></li>
+                                                <li role="separator" class="divider"></li>
+                                                <li><a href="javascript:void(0)" id="edit01">编辑...</a></li>
+                                            </ul>
+                                        </div>                                    
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-body" id="PendingTaskWidgetContent">
+                                @{Html.RenderAction("Index", "PendingTask", new RouteValueDictionary() { { "Area" , "PM" }, { "Id", "00f62c5acfe840e0bee3ca2979f0f025" } });}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="float: left; width: 33%;">
+                    <div style="height: 265px; border: 1px solid #e6e6e6; background-color: #fff;">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><i class="fa fa-send fa-lg" style="padding-right: 5px;"></i>待处理2</div>
+                            <div class="panel-body">
+                                @{Html.RenderAction("Index", "PendingTask", new { Area = "PM" });}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <style>
+            #copyrightcontent {
+                height: 30px;
+                line-height: 29px;
+                overflow: hidden;
+                position: absolute;
+                top: 100%;
+                margin-top: -30px;
+                width: 100%;
+                background-color: #fff;
+                border: 1px solid #e6e6e6;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .dashboard-stats {
+                float: left;
+                width: 20%;
+            }
+
+            .dashboard-stats-item {
+                position: relative;
+                overflow: hidden;
+                color: #fff;
+                cursor: pointer;
+                height: 105px;
+                margin-right: 25px;
+                margin-bottom: 10px;
+                padding: 20px 20px;
+            }
+
+                .dashboard-stats-item .m-top-none {
+                    margin-top: 2px;
+                }
+
+                .dashboard-stats-item h2 {
+                                        font-size: 35px;
+                                        font-family: inherit;
+                                        line-height: 1.1;
+                                        font-weight: 500;
+                                    }
+
+                .dashboard-stats-item h5 {
+                                        font-size: 14px;
+                                        font-family: inherit;
+                                        margin-top: 3px;
+                                        line-height: 1.1;
+                                    }
+
+
+                .dashboard-stats-item .stat-icon {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    font-size: 30px;
+                    opacity: .3;
+                }
+
+            .dashboard-stats i.fa.stats-icon {
+                                    width: 50px;
+                                    padding: 20px;
+                                        font-size: 50px;
+                                        text-align: center;
+                                    color: #fff;
+                height: 50px;
+                                        border-radius: 10px;
+                                    }
+
+            .panel-default {
+                border: none;
+                border-radius: 0px;
+                margin-bottom: 0px;
+                box-shadow: none;
+                -webkit-box-shadow: none;
+            }
+
+                .panel-default > .panel-heading {
+                    color: #777;
+                    background-color: #fff;
+                    border-color: #e6e6e6;
+                    padding: 10px 10px;
+                }
+
+                .panel-default > .panel-body {
+                    padding: 10px;
+                    padding-bottom: 0px;
+                }
+
+                    .panel-default > .panel-body ul {
+                        overflow: hidden;
+                        padding: 0;
+                        margin: 0px;
+                        margin-top: -5px;
+                    }
+
+                        .panel-default > .panel-body ul li {
+                            line-height: 27px;
+                            list-style-type: none;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
+                        }
+
+                            .panel-default > .panel-body ul li .time {
+                                color: #a1a1a1;
+                                float: right;
+                                padding-right: 5px;
+                            }
+        </style>
+
+    <script type="text/javascript">
+
+        function submitForm() {
+            $("#PendingTaskWidgetContent").empty();
+            $.ajax({
+                url: '@Url.Action("Index", "PendingTask", new RouteValueDictionary() { { "Area" , "PM" }, { "Id", "00f62c5acfe840e0bee3ca2979f0f025" } })',
+                type: "POST",
+                data: { keyValue: keyValue },
+                dataType: "html",
+                async: false,
+                success: function (data) {
+                    $("#PendingTaskWidgetContent").append(data);
+                }
+            });
+        }
+
+        (function ($) {
+            $(function () {
+                $("#edit01").click(function () {
+                    editWidget('@Url.Action("Setting", "PendingTask", new RouteValueDictionary() { { "Area", "PM" } })' + '?Id=00f62c5acfe840e0bee3ca2979f0f025' );
+                });
+            });
+
+            function editWidget(editUrl) {
+                $.modalOpen({
+                    id: "Form",
+                    title: "编辑",
+                    url: editUrl,
+                    width: "900px",
+                    height: "700px",
+                    callBack: function (iframeId) {
+                        console.log(iframeId);
+                        console.log("callBack");
+                        top.frames[iframeId].submitForm();
+                    }
+                });
+            }
+
+        })($)
+    </script>
+
+    <!-- #endregion -->
+</body>
+</html>

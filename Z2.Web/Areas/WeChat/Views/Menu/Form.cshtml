@@ -1,0 +1,172 @@
+﻿@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+<script>
+    var keyValue = $.request("keyValue");
+    $(function () {
+        if (!!keyValue) {
+            $.ajax({
+                url: "/WeChat/Menu/GetFormJson",
+                type: 'post',
+                data: { keyValue: keyValue },
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    $("#form1").formSerialize(data);
+                }
+            });
+        }
+
+    });
+
+    //窗体表单提交
+    function submitForm() {
+        if (!$('#form1').formValid()) {
+            return false;
+        }
+        var postData = $("#form1").formSerialize();
+        $.submitForm({
+            url: "/WeChat/Menu/SubmitForm?keyValue=" + keyValue,
+            param: postData,
+            success: function () {
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+
+            }
+        });
+
+    }
+
+    function unloadFile(file) {
+        var fileName = file.files[0].name;
+        var fileType = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+        var fileTypeArr = [".gif", ".jpg", ".bmp", ".png", ".jpeg"];
+        if (fileTypeArr.indexOf(fileType) != -1) {
+            $("#Avatar").val(fileName);
+        }
+        else {
+            alert("只允许上传" + fileTypeArr + "类型的文件。");
+        }
+    }
+
+</script>
+<style>
+    .FileSelectHide {
+        width: 80px;
+        height: 32px;
+        overflow: hidden;
+        position: relative;
+        background-image: none;
+        background-attachment: scroll;
+        background-repeat: no-repeat;
+        background-position-x: center;
+        background-position-y: center;
+        background-size: auto;
+        background-origin: padding-box;
+        background-clip: border-box;
+        background-color: transparent;
+        margin-top: -34px;
+    }
+
+        .FileSelectHide input {
+            height: 34px;
+            right: 0px;
+            bottom: 0px;
+            font-size: 20px;
+            -webkit-filter: opacity(0%);
+            filter: alpha(opacity=0);
+            position: absolute;
+            cursor: pointer;
+            outline-width: medium;
+            outline-style: none;
+            outline-color: invert;
+            opacity: 0;
+        }
+</style>
+<form id="form1">
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">编辑微信公众号</a></li>
+        </ul>
+        <div style="padding-top: 10px; margin-right: 30px;">
+            <table class="form">
+                <tr>
+                    <th class="formTitle">公众号名称</th>
+                    <td class="formValue">
+                        <input id="WxName" name="WxName"   type="text" class="form-control required" placeholder="请输入公众号名称" />
+                    </td>
+                    <th class="formTitle">公众号原始Id</th>
+                    <td class="formValue">
+                        <input id="WxId" name="WxId" type="text" class="form-control required" placeholder="请输入公众号Id" />
+                    </td>
+
+
+                </tr>
+                <tr>
+                    <th class="formTitle">微信号</th>
+                    <td class="formValue">
+                        <input id="WeiXinCode" name="WeiXinCode" type="text" class="form-control required" placeholder="请输入微信号" />
+                    </td>
+                </tr>
+                <tr>
+                    <td hidden>
+                        <input type="text" id="FileID" name="FileID" />
+                    </td>
+                    <th class="formTitle">头像</th>
+                    <td class="formValue">
+                        <input type="text" id="Avatar" name="Avatar" class="form-control fileWidth" readonly="readonly" />
+                    </td>
+                    <td class="formValue fileEle">
+                        <input type="button" value="选择文件" id="btnFileSelect" class="btn btn-primary" />
+                        <div class="FileSelectHide">
+                            <input id="upFile" name="upFile" type="file" class="addFile" onchange="unloadFile(this)" />
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th class="formTitle">接口地址</th>
+                    <td class="formValue">
+                        <input id="ApiUrl" name="ApiUrl" type="text" class="form-control required" placeholder="请输入接口地址" />
+
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">Token值</th>
+                    <td class="formValue">
+                        <input id="Access_Token" name="Access_Token" type="text" class="form-control required" placeholder="与公众帐号官方网站上保持一致" />
+                    </td>
+                </tr>
+                <tr style="height:40px !important">
+                    <th></th>
+                    <td style="color: #4BA8D6">以下是高级功能配置，非必填项</td>
+                </tr>
+                <tr>
+                    <th class="formTitle" style="padding-top: 5px;">
+                        AppId
+                    </th>
+                    <td class="formValue" colspan="3">
+                        <input type="text" id="AppId" name="AppId" class="form-control" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle" style="padding-top: 5px;">
+                        AppSecret
+                    </th>
+                    <td class="formValue" colspan="3">
+                        <input type="text" id="AppSecret" name="AppSecret" class="form-control" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle" style="padding-top: 5px;">
+                        备注
+                    </th>
+                    <td class="formValue" colspan="3">
+                        <textarea type="text" id="Remark" name="Remark" class="form-control" style="height: 60px; width:95%"></textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>

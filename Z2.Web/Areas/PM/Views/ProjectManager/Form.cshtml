@@ -1,0 +1,88 @@
+﻿@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+<style type="text/css">
+</style>
+<script>
+    var keyValue = $.request("keyValue");
+    $(function () {
+        if (!!keyValue) {
+            $.ajax({
+                url: "@Url.RouteUrl("PM_default", new { action= "GetEditJson", controller = "ProjectManager" } )",
+                type: 'POST',
+                data: { keyValue: keyValue },
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    $("#form1").formSerialize(data);
+                }
+            });
+        }
+        else {
+            $("#ActualWork").attr("checked", "checked");
+            $("#EnabledFlag").attr("checked", "checked");
+        }
+    });
+
+    //窗体表单提交
+    function submitForm() {
+        if (!$('#form1').formValid()) {
+            return false;
+        }
+        var postData = $("#form1").formSerialize();
+        $.submitForm({
+            url: "@Url.RouteUrl("PM_default", new { action = "SubmitForm", controller = "ProjectManager" })",
+            param: postData,
+            success: function () {
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+            }
+        });
+    }
+
+</script>
+<form id="form1">
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">项目</a></li>
+        </ul>
+        <div style="padding-top: 10px; margin-right: 30px;">
+            <table class="form">
+                <tr>
+                    <th class="formTitle">项目名称</th>
+                    <td class="formValue">
+                        <div>
+                            <input id="ProjectId" name="ProjectId" hidden="hidden" />
+                            <input id="ProjectName" name="ProjectName" type="text" class="form-control required" placeholder="请输入项目名称" maxlength="50" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">项目编码</th>
+                    <td class="formValue">
+                        <input id="ProjectCode" name="ProjectCode" type="text" class="form-control required" placeholder="请输入项目编码" maxlength="50" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">选项</th>
+                    <td class="formValue">
+                        <div class="ckbox">
+                            <input id="ActualWork" name="ActualWork" type="checkbox" />
+                            <label for="ActualWork">工时计算</label>
+                        </div>
+                        <div class="ckbox">
+                            <input id="EnabledFlag" name="EnabledFlag" type="checkbox" />
+                            <label for="EnabledFlag">有效</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">排序</th>
+                    <td class="formValue">
+                        <input id="DisplayNo" name="DisplayNo" type="text" class="form-control" placeholder="请输入项目排序" oninput="value=value.replace(/[^\d]/g,'')" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>

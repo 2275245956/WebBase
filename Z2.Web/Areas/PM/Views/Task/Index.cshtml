@@ -1,0 +1,415 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+    var TaskPriority = ViewBag.Urgent;
+}
+
+<style>
+    .warning {
+        background-color: orange;
+    }
+
+    .urgent {
+        background-color: orangered;
+    }
+
+    .TaskName {
+        color: #0563C1;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+</style>
+
+<div class="topPanel">
+    <div class="toolbar">
+
+        @*范文强 2018/12/7  修改按钮加载方式  部分视图*@
+        @Html.Partial("~/Views/Shared/_Partial_LoadButtons.cshtml")
+        @*<script>$('.toolbar').authorizeButton()</script>*@
+    </div>
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <label for="ProjectId">项目：</label>
+                </td>
+                <td style="width:100px;">
+                    @Html.DropDownList("ProjectId", (SelectList)ViewBag.ProjectList, new { @class = "form-control" })
+                </td>
+                <td>
+                    <label for="WorkerId" style="margin-left:5px;">指派：</label>
+                </td>
+                <td style="width:100px;">
+                    @Html.DropDownList("WorkerId", (SelectList)ViewBag.UserInfoList, new { @class = "form-control" })
+                </td>
+                
+                @*根据任务类型检索  //2019/1/31  *@
+                <td>
+                    <label for="AssignTypeId" style="margin-left:5px;">类型：</label>
+                </td>
+                <td style="width:100px;">
+                    @Html.DropDownList("AssignTypeId", (SelectList)ViewBag.types, new { @class = "form-control" })
+                </td>
+
+
+
+
+                <td>
+                    <label for="WorkerId" style="margin-left:5px;">检索：</label>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <input id="txt_keyword" type="text" class="form-control" style="width: 200px;" placeholder="项目名/任务名/任务号">
+
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                </td>
+                @*
+                                <td>
+                                   <div class="ckbox" style="margin-left:10px !important;">
+                                <input style="margin-top:10px !important;" id="isme" type="checkbox" /><label for="isme">所有人</label>
+                            </div>
+                        <input style="margin-left:10px !important;" id="isme" type="checkbox" /><label for="isme">所有人</label>
+                    </td>*@
+                <td>
+                    @*<div class="ckbox">
+                            <input id="isclosed" type="checkbox" /><label for="isclosed">已关闭</label>
+                        </div>*@
+                    <input style="margin-left:10px !important;" id="isclosed" type="checkbox" /><label for="isclosed">已关闭</label>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <button id="btn_search2" type="button" class="btn  btn-primary" style="width:60px !important;margin-left:10px;"><i class="fa fa-search">检索</i></button>
+
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>
+
+@section overscripts{
+    <script type="text/javascript">
+        //windowResizeHelper.after_resizeWindow = function () {
+        //    $("#gridList").setGridWidth($(window).width() - 2);
+        //}
+    </script>
+}
+
+
+@section scripts{
+    <script>
+        $(document).keydown(function(event) {
+            if (event.keyCode == 13) {
+                $("#btn_search").click();
+            }
+        });
+    </script>
+
+
+    <script>
+
+        function reloadGrid() {
+            $("#gridList").resetSelection();
+            $("#gridList").trigger("reloadGrid");
+        }
+
+        $(function() {
+
+            var taskHelper = {
+                loadGrid: function() {
+                    console.log($("#isme").is("checked"));
+                    //var _height = (!!window.ActiveXObject || "ActiveXObject" in window) ? 110 : 145;
+
+                    var windowWidth = $(window).width();
+
+                    $("#gridList").dataGrid({
+                        url: '@Url.Action("GetList")',
+                        //height: $(window).height() - _height,
+                        width: windowWidth,
+                        //rownumbers: false,
+                        //shrinkToFit: false,
+                        postData: {
+                            searchtxt: $("#txt_keyword").val(),
+                            ProjectId: $("#ProjectId").val(),
+                            WorkerId: $("#WorkerId").val(),
+                            AssignTypeId: $("#AssignTypeId").val(), //2019/1/31  增加一个字段   AssignTypeId 来选择类型查询
+                            isall: false, //$("#isme").is("checked"),
+                            isclosed: $("#isclosed").is("checked"),
+                        },
+                        pager: "#gridPager",
+                        sortname: 'RowNo',
+                        viewrecords: true,
+                        sortable: false,
+                        colModel: [
+                            { label: 'TaskId', name: 'TaskId', hidden: true },
+                            { label: 'TaskPriority', name: 'TaskPriority', align: 'center', hidden: true },
+                            {
+                                label: '项目',
+                                name: 'ProjectName',
+                                width: 100,
+                                fixed: true,
+                                align: 'left',
+                                sortable: false,
+                            },
+                            {
+                                label: '优先级',
+                                name: 'TaskPriorityStr',
+                                width: 50,
+                                fixed: true,
+                                align: 'center',
+                                sortable: false,
+                            },
+                            { label: 'TaskStatus', name: 'TaskStatus', align: 'center', hidden: true },
+                            {
+                                label: '状态',
+                                name: 'TaskStatusStr',
+                                width: 100,
+                                fixed: true,
+                                align: 'center',
+                                sortable: false,
+                            },
+                            {
+                                label: '标题',
+                                name: 'TaskName',
+                                width: 880,
+                                align: 'left',
+                                formatter: taskHelper.formatterTaskName,
+                                sortable: false,
+                                resizable: true,
+                            }, //, formatter: taskHelper.formatterTaskName
+                            //{ label: '指派', name: 'Worker', width: 100, fixed: true, align: 'left', formatter: taskHelper.formatterWorker, sortable: false, },
+                            {
+                                label: '指派',
+                                name: 'AssignUsersStr',
+                                width: 300,
+                                fixed: true,
+                                align: 'left',
+                                sortable: false,
+                            },
+                            {
+                                label: '进度%',
+                                name: 'TaskPercent',
+                                width: 80,
+                                fixed: true,
+                                align: 'center',
+                                sortable: false,
+                            },
+                            {
+                                label: '计划日期',
+                                name: 'DueDateStr',
+                                width: 150,
+                                fixed: true,
+                                align: 'center',
+                                sortable: false,
+                                formatter: taskHelper.formatterDate
+                            }
+                        ],
+                        gridComplete: function() {
+                            var ids = $("#gridList").getDataIDs();
+                            var rDate = commhelper.Dateformat(new Date(), "yyyy-MM-dd hh:mm:ss");
+                            for (var i = 0; i < ids.length; i++) {
+                                var rowData = $("#gridList").getRowData(ids[i]);
+                                if (rDate > rowData.DueDate) { // 当前时间大于计划完成时间，显示黄色
+                                    $('#' + ids[i]).find("td").addClass("warning");
+                                }
+
+                                if ('@TaskPriority' == rowData.TaskPriority) { // 优先级是紧急的，显示红色
+                                    $('#' + ids[i]).find("td").addClass("urgent");
+                                }
+                            }
+                        }
+                    });
+                },
+                formatterTaskName: function (cellvalue, options, rowObject) {
+                    //console.log(cellvalue);
+                    //console.log(options);
+                    //console.log(rowObject);
+                    var url = '@Url.Action("TaskPreView", "Task")' + '?taskId=' + rowObject.TaskId;
+                    //var url = "/PM/Task/TaskPreView?taskId=" + rowObject.TaskId;
+                    //console.log(url);
+                    if (rowObject.LinkTaskId) {
+                        return '<a href="javascript:void(0);" class="TaskName" TaskId="' +
+                            rowObject.TaskId +
+                            '">' +
+                            '#' +
+                            rowObject.LinkTaskId +
+                            '-' +
+                            cellvalue +
+                            '</a>';
+                    } else {
+                        return '<a href="javascript:void(0);" class="TaskName" TaskId="' +
+                            rowObject.TaskId +
+                            '">' +
+                            cellvalue +
+                            '</a>';
+                    }
+                },
+
+                formatterDate: function(cellvalue, options, rowObject) {
+                    var StartDateStr = rowObject.StartDateStr;
+                    var DueDateStr = rowObject.DueDateStr;
+                    if (!StartDateStr) {
+                        StartDateStr = "-";
+                    }
+                    if (!DueDateStr) {
+                        DueDateStr = "-";
+                    }
+                    return '<div>' +
+                        StartDateStr +
+                        '</div>' +
+                        '<div>' +
+                        DueDateStr +
+                        '</div>'
+
+                },
+
+                formatterWorker: function(cellvalue, options, rowObject) {
+                    var DevUserName = rowObject.DevUserName;
+                    var TestUserName = rowObject.TestUserName;
+                    var ReviewUserName = rowObject.ReviewUserName;
+
+                    var DevEstimatedHours = rowObject.DevEstimatedHours;
+                    var ReviewEstimatedHours = rowObject.ReviewEstimatedHours;
+                    var TestEstimatedHours = rowObject.TestEstimatedHours;
+
+                    if (!DevEstimatedHours) {
+                        DevEstimatedHours = "-";
+                    }
+                    if (!ReviewEstimatedHours) {
+                        ReviewEstimatedHours = "-";
+                    }
+                    if (!TestEstimatedHours) {
+                        TestEstimatedHours = "-";
+                    }
+
+                    if (DevUserName == null) {
+                        DevUserName = '-';
+                    }
+                    if (TestUserName == null) {
+                        TestUserName = '-';
+                    }
+                    if (ReviewUserName == null) {
+                        ReviewUserName = '-';
+                    }
+
+                    return '<div>' +
+                        DevUserName +
+                        ' / ' +
+                        DevEstimatedHours +
+                        '</div>' +
+                        '<div>' +
+                        ReviewUserName +
+                        ' / ' +
+                        ReviewEstimatedHours +
+                        '</div>' +
+                        '<div>' +
+                        TestUserName +
+                        ' / ' +
+                        TestEstimatedHours +
+                        '</div>'
+                },
+                btnAddclick: function() {
+                    $.modalOpen({
+                        id: "Form",
+                        title: "新任务",
+                        url: "@Url.Action("CreateTaskView", "Task")",
+                        width: "900px",
+                        height: "700px",
+                        callBack: function(iframeId) {
+                            console.log(iframeId);
+                            console.log("callBack");
+                            top.frames[iframeId].submitForm();
+                        }
+                    });
+                },
+
+                btnDetailclick: function(taskId) {
+                    console.log(JSON.stringify(taskId));
+                    $.modalOpen({
+                        id: "Form",
+                        title: "EditTask",
+                        url: "@Url.Action("TaskPreView", "Task")?TaskID=" + taskId,
+                        width: "900px",
+                        height: "700px",
+                        callBack: function(iframeId) {
+                            top.frames[iframeId].submitForm();
+                        }
+                    });
+                },
+                searchData: function() {
+                    var postData = {
+                        searchtxt: $("#txt_keyword").val(),
+                        ProjectId: $("#ProjectId").val(),
+                        WorkerId: $("#WorkerId").val(),
+                        AssignTypeId: $("#AssignTypeId").val(), //2019/1/31  增加一个字段   AssignTypeId 来选择类型查询
+                        isall: false, //$("#isme").is(":checked"),
+                        isclosed: $("#isclosed").is(":checked"),
+                    }
+                    $("#gridList").jqGrid('setGridParam',
+                        {
+                            datatype: 'json',
+                            postData: postData,
+                        },
+                        true).trigger("reloadGrid");
+                }
+
+            }
+
+            $("#ProjectId").bindSelect();
+            $("#WorkerId").bindSelect();
+            $("#AssignTypeId").bindSelect();
+            taskHelper.loadGrid();
+
+            $("#btn_search").click(function() {
+                taskHelper.searchData();
+                //$("#gridList").jqGrid().setGridParam(postdata).trigger('reloadGrid');
+            });
+
+            $("#AssignTypeId").change(function() {
+                taskHelper.searchData();
+            });
+
+
+            $("#btn_search2").click(function() {
+                taskHelper.searchData();
+                //$("#gridList").jqGrid().setGridParam(postdata).trigger('reloadGrid');
+            });
+
+            $("#btnCreate").click(taskHelper.btnAddclick);
+
+            $(document).on("click",
+                '.TaskName',
+                function() {
+                    //$.addTab();
+                    var taskId = $(this).attr("TaskId")
+                    var url = '@Url.Action("TaskPreView", "Task")' + '?TaskID=' + taskId;
+                    var url2 = '@Url.RouteUrl("SystemManage_default", new {action = "Index", controller = "Organize"})';
+                    console.log(url2);
+                    $.addNewWindow('详细', url); ///SystemManage/Organize/Index
+
+                });
+            $("#isme").change(function() {
+                taskHelper.searchData();
+            });
+
+            $("#isclosed").change(function() {
+                taskHelper.searchData();
+            });
+        })
+
+    </script>
+
+
+}
+
+
+
+
+

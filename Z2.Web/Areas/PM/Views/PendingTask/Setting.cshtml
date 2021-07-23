@@ -1,0 +1,47 @@
+﻿@model Z2.Web.Areas.PM.Controllers.PendingTaskViewModel
+@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+<form id="form1">
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">组件</a></li>
+        </ul>
+        <div style="padding-top: 10px; margin-right: 30px;">
+            <table class="form">
+                <tr>
+                    <th class="formTitle">字符串</th>
+                    <td class="formValue">
+                        @Html.TextBoxFor(m => m.WString, new { @class = "form-control " })
+                    </td>
+                    <th class="formTitle">日期</th>
+                    <td class="formValue">
+                        @Html.TextBoxFor(m => m.WDate, new { @class = "form-control required input-wdatepicker", onfocus = "WdatePicker()" })
+                    </td>
+
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    function submitForm() {
+        if (!$('#form1').formValid()) {
+            return false;
+        }
+        var formData = $("#form1").formSerialize();
+        var postData = { Id: $.request("Id"), model: formData };
+        $.submitForm({
+            url: "@Url.Action("SaveSetting")",
+            param: postData,
+            success: function () {
+                $.currentWindow().location.reload();
+                $.modalClose();
+            }
+        });
+    }
+
+</script>

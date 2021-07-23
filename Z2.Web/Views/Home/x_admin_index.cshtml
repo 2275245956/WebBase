@@ -1,0 +1,430 @@
+﻿@using Z2.Core.Configs;
+@using Z2.Core.Operator;
+@{
+    string SystemName = ConfigWrap.GetValue("SystemName");
+    string SystemShortName = ConfigWrap.GetValue("SystemShortName");
+    var currentUser = OperatorProvider.Provider.GetCurrent();
+}
+<!doctype html>
+<html>
+<head>
+    <title>@SystemName</title>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link href="~/Content/css/framework-font.css" rel="stylesheet" />
+    <link href="~/Content/xadmin/css/font.css" rel="stylesheet" />
+    <link href="~/Content/xadmin/css/xadmin.css" rel="stylesheet" />
+    <script src="~/Content/js/jquery/jquery-3.2.1.min.js"></script>
+    <script src="~/Content/xadmin/lib/layui/layui.js"></script>
+    <script src="~/Content/xadmin/js/xadmin.js"></script>
+</head>
+<body>
+    <!-- 顶部开始 -->
+    <div class="container">
+        <div class="logo">@Html.ActionLink(SystemShortName, "Index", "Home")</div>
+        <div class="left_open">
+            <i title="展开左侧栏" class="iconfont">&#xe699;</i>
+        </div>
+        <ul class="layui-nav left fast-add" lay-filter="">
+            <li class="layui-nav-item">
+                <a href="javascript:;">+@Resources.BaseRes.Create</a>
+                <dl class="layui-nav-child">
+                    <!-- 二级菜单 -->
+                    <dd><a onclick="x_admin_show('资讯','http://www.xh2005.com')"><i class="iconfont">&#xe6a2;</i>资讯</a></dd>
+                    <dd><a onclick="x_admin_show('图片','http://www.xh2005.com')"><i class="iconfont">&#xe6a8;</i>图片</a></dd>
+                    <dd><a onclick="x_admin_show('用户','http://www.xh2005.com')"><i class="iconfont">&#xe6b8;</i>用户</a></dd>
+                </dl>
+            </li>
+        </ul>
+        <ul class="layui-nav right" lay-filter="">
+            <li class="layui-nav-item">
+                <a href="javascript:;">@currentUser.UserName</a>
+                <dl class="layui-nav-child">
+                    <!-- 二级菜单 -->
+                    <dd><a onclick="x_admin_show('个人信息','http://www.xh2005.com')">个人信息</a></dd>
+                    <dd><a onclick="x_admin_show('切换帐号','http://www.xh2005.com')">切换帐号</a></dd>
+                    <dd><a href="#" id="index_logout">退出</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item to-index"><a href="@Url.Action("Index","Home")">@Resources.BaseRes.FirstPage</a></li>
+        </ul>
+
+    </div>
+    <!-- 顶部结束 -->
+    <!-- 中部开始 -->
+    <!-- 左侧菜单开始 -->
+    <div class="left-nav">
+        <div id="side-nav">
+            <ul id="nav">
+                <li>
+                    <a class="dropdown-toggle" href="javascript:;" data-id="462027F0-0848-41DD-BCC3-025DCAE65555"><i class="fa fa-gears"></i><cite>系统管理</cite><i class="iconfont nav_right">&#xe697;</i></a>
+                    <ul class="sub-menu">
+                        <li><a class="menuItem" _href="@Url.Content("~/SystemManage/Office/Index")" data-id="252229DB-35CA-47AE-BDAE-C9903ED5BA7B" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>事业所</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/SystemManage/Organize/Index")" data-id="252229DB-35CA-47AE-BDAE-C9903ED5BA7B" data-index="2"><i class="iconfont">&#xe6a7;</i><cite>机构管理</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/SystemManage/Role/Index")" data-id="91A6CFAD-B2F9-4294-BDAE-76DECF412C6C" data-index="3"><i class="iconfont">&#xe6a7;</i><cite>角色管理</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/SystemManage/Duty/Index")" data-id="91A6CFAD-B2F9-4294-BDAE-76DECF412C6C" data-index="4"><i class="iconfont">&#xe6a7;</i><cite>岗位管理</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/SystemManage/User/Index")" data-id="38CA5A66-C993-4410-AF95-50489B22939C" data-index="5"><i class="iconfont">&#xe6a7;</i><cite>用户管理</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/SystemManage/Module/Index")" data-id="64A1C550-2C61-4A8C-833D-ACD0C012260F" data-index="6"><i class="iconfont">&#xe6a7;</i><cite>功能模块</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/SystemManage/RoleModule/Index")" data-id="64A1C550-2C61-4A8C-833D-ACD0C012260F" data-index="7"><i class="iconfont">&#xe6a7;</i><cite>权限分配</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/FileManage/File/Index")" data-id="64A1C550-2C61-4A8C-833D-ACD0C012260F" data-index="8"><i class="iconfont">&#xe6a7;</i><cite>文件管理</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/SystemManage/SysSetting/Index")" data-id="64A1C550-2C61-4A8C-833D-ACD0C012260F" data-index="9"><i class="iconfont">&#xe6a7;</i><cite>系统配置</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/Mall/ProductCategory/TestPage")" data-id="64A1C550-2C61-4A8C-833D-ACD0C012260F" data-index="10"><i class="iconfont">&#xe6a7;</i><cite>测试界面</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/SystemManage/PageConfigure/Index")" data-id="12864583-4800-40C4-B5C1-2D0A25B6E8A7" data-index="11"><i class="iconfont">&#xe6a7;</i><cite>页面配置</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/SystemManage/PageConfigure/Test")" data-id="4B5930C9-61A2-4634-A412-7C350C346CD8" data-index="12"><i class="iconfont">&#xe6a7;</i><cite>生成页面测试</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/Home/WidgetTest")" data-id="4B5930C9-61A2-4634-A412-7C350C346CD8" data-index="12"><i class="iconfont">&#xe6a7;</i><cite>WidgetTest</cite></a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a class="dropdown-toggle" href="javascript:;" data-id="462027D2-0848-41DD-BCC3-025DCAE65555"><i class="fa fa-gears"></i><cite>字典管理</cite><i class="iconfont nav_right">&#xe697;</i></a>
+                    <ul class="sub-menu">
+                        @*此处增加区域导航栏  data-id的值是复制上面的没有改动，只改动链接文本和链接路径*@
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/Area")" data-id="FA7537E2-1C64-4431-84BF-66158DD63269" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>区域</cite></a></li>
+                        @*增加结束*@
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/Education")" data-id="00F76465-DBBA-484A-B75C-E81DEE9313E6" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>学历</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/DbType")" data-id="0DF5B725-5FB8-487F-B0E4-BC563A77EB04" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>数据库类型</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/Nationnality")" data-id="15023A4E-4856-44EB-BE71-36A106E2AA59" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>民族</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/CertificateType")" data-id="2748F35F-4EE2-417C-A907-3453146AAF67" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>证件名称</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/Birth")" data-id="8CEB2F71-026C-4FA6-9A61-378127AE7320" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>生育</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/AudiState")" data-id="954AB9A1-9928-4C6D-820A-FC1CDC85CDE0" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>审核状态</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/DbLogType")" data-id="9a7079bd-0660-4549-9c2d-db5e8616619f" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>系统日志</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/OrganizeCategory")" data-id="9EB4602B-BF9A-4710-9D80-C73CE89BEC5D" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>机构分类</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/Sex")" data-id="BDD797C3-2323-4868-9A63-C8CC3437AEAA" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>性别</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/RoleType")" data-id="D94E4DC1-C2FD-4D19-9D5D-3886D39900CE" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>角色类型</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/DicMng/Marriage")" data-id="FA7537E2-1C64-4431-84BF-66158DD63269" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>婚姻</cite></a></li>
+                    </ul>
+                </li>
+
+                <li id="malllist">
+                    <a class="dropdown-toggle" href="javascript:;" data-id="468027E0-0848-41DD-BCC3-025DCAE65555"><i class="fa fa-gears"></i><cite>商城</cite><i class="iconfont nav_right">&#xe697;</i></a>
+                    <ul class="sub-menu">
+                        <li><a class="menuItem" _href="@Url.Content("~/Mall/Brand")" data-id="FA7537E2-1C64-4431-84BF-66158DD63269" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>品牌</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/Mall/ProductCategory")" data-id="00F76465-DBBA-484A-B75C-E81DEE9313E6" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>商品种类</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/Mall/StoreIndustries")" data-id="0DF5B725-5FB8-487F-B0E4-BC563A77EB04" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>店铺行业</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/Mall/StoreRank")" data-id="15023A4E-4856-44EB-BE71-36A106E2AA59" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>店铺级别</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/Mall/Store")" data-id="2748F35F-4EE2-417C-A907-3453146AAF67" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>店铺</cite></a></li>
+                    </ul>
+                </li>
+
+                <!-- #region 2018/12/12 范文强  添加   微信平台开发 -->
+                <li>
+                    <a class="dropdown-toggle" href="javascript:;" data-id="9C1B81C1-0B9E-4C0E-A97B-119DCA9B9FF7"><i class="fa fa-gears"></i><cite>WeChat</cite><i class="iconfont nav_right">&#xe697;</i></a>
+                    <ul class="sub-menu">
+
+                        <li>
+                            <a class="dropdown-toggle" _href="javascript:;" data-id="F415F732-A95A-43C7-B2DA-5BEA28C0DB6D" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>微信管理</cite></a>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a class="menuItem" _href="@Url.Content("~/WeChat/Menu/Index")" data-id="F415F732-A95A-43C7-B2DA-5BEA28C0DB6D" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>微信管理首页</cite></a>
+                                </li>
+                                <li><a class="menuItem" _href="@Url.Content("~/WeChat/MsgReplySubscribe/Index")" data-id="F415F732-A95A-43C7-B2DA-5BEA28C0DB6D" onclick="" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>关注时回复</cite></a></li>
+                                <li><a class="menuItem" _href="#" data-id="F415F732-A95A-43C7-B2DA-5BEA28C0DB6D" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>默认回复</cite></a></li>
+                                <li><a class="menuItem" _href="#" data-id="F415F732-A95A-43C7-B2DA-5BEA28C0DB6D" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>文本回复</cite></a></li>
+                                <li><a class="menuItem" _href="#" data-id="F415F732-A95A-43C7-B2DA-5BEA28C0DB6D" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>图文回复</cite></a></li>
+                                <li><a class="menuItem" _href="#" data-id="F415F732-A95A-43C7-B2DA-5BEA28C0DB6D" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>语音回复</cite></a></li>
+                                <li><a class="menuItem" _href="#" data-id="F415F732-A95A-43C7-B2DA-5BEA28C0DB6D" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>请求恢复记录</cite></a></li>
+                                <li><a class="menuItem" _href="#" data-id="F415F732-A95A-43C7-B2DA-5BEA28C0DB6D" data-index="1"><i class="iconfont">&#xe6a7;</i><cite>LBS位置回复</cite></a></li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                </li>
+                <!-- #region 2018/12/12 范文强  添加   微信平台开发  结束 -->
+                @*
+                <li>
+                    <a class="dropdown-toggle" href="javascript:;" data-id="10CBDF9B-AE81-47D0-AD0F-C701A6481745"><i class="fa fa-gears"></i><cite>PM</cite><i class="iconfont nav_right">&#xe697;</i></a>
+                    <ul class="sub-menu">
+                        <li><a class="menuItem" _href="@Url.Content("~/PM/Task/TaskPreView")"><i class="iconfont">&#xe6a7;</i><cite>任务显示</cite></a></li>
+                        <li><a class="menuItem" _href="@Url.Content("~/PM/Task/CreateTaskView")"><i class="iconfont">&#xe6a7;</i><cite>TestPartialView</cite></a></li>
+                    </ul>
+                </li>
+                *@
+                @*在常用菜单前添加*@
+                @* 2018/11/23 范文强 更改菜单获取方式
+                    后台直接返回拼接好的字符串返回到前台即可
+                *@
+                @Html.Action("GetMenuForXAdmin", "Home")
+                @*动态菜单结束*@
+
+
+                <li>
+                    <a href="javascript:;">
+                        <i class="iconfont">&#xe6b8;</i>
+                        <cite>会员管理</cite>
+                        <i class="iconfont nav_right">&#xe697;</i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li>
+                            <a _href="member-list.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>会员列表</cite>
+
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="member-del.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>会员删除</cite>
+
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:;">
+                                <i class="iconfont">&#xe70b;</i>
+                                <cite>会员管理</cite>
+                                <i class="iconfont nav_right">&#xe697;</i>
+                            </a>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a _href="xxx.html">
+                                        <i class="iconfont">&#xe6a7;</i>
+                                        <cite>会员列表</cite>
+
+                                    </a>
+                                </li>
+                                <li>
+                                    <a _href="xx.html">
+                                        <i class="iconfont">&#xe6a7;</i>
+                                        <cite>会员删除</cite>
+
+                                    </a>
+                                </li>
+                                <li>
+                                    <a _href="xx.html">
+                                        <i class="iconfont">&#xe6a7;</i>
+                                        <cite>等级管理</cite>
+
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:;">
+                        <i class="iconfont">&#xe723;</i>
+                        <cite>订单管理</cite>
+                        <i class="iconfont nav_right">&#xe697;</i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li>
+                            <a _href="order-list.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>订单列表</cite>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:;">
+                        <i class="iconfont">&#xe723;</i>
+                        <cite>分类管理</cite>
+                        <i class="iconfont nav_right">&#xe697;</i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li>
+                            <a _href="cate.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>多级分类</cite>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:;">
+                        <i class="iconfont">&#xe723;</i>
+                        <cite>城市联动</cite>
+                        <i class="iconfont nav_right">&#xe697;</i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li>
+                            <a _href="city.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>三级地区联动</cite>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:;">
+                        <i class="iconfont">&#xe726;</i>
+                        <cite>管理员管理</cite>
+                        <i class="iconfont nav_right">&#xe697;</i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li>
+                            <a _href="admin-list.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>管理员列表</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="admin-role.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>角色管理</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="admin-cate.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>权限分类</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="admin-rule.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>权限管理</cite>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:;">
+                        <i class="iconfont">&#xe6ce;</i>
+                        <cite>系统统计</cite>
+                        <i class="iconfont nav_right">&#xe697;</i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li>
+                            <a _href="echarts1.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>拆线图</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="echarts2.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>柱状图</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="echarts3.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>地图</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="echarts4.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>饼图</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="echarts5.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>雷达图</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="echarts6.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>k线图</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="echarts7.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>热力图</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="echarts8.html">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>仪表图</cite>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:;">
+                        <i class="iconfont">&#xe6b4;</i>
+                        <cite>图标字体</cite>
+                        <i class="iconfont nav_right">&#xe697;</i>
+                    </a>
+                    <ul class="sub-menu">
+                        <li>
+                            <a _href="@Url.Action("unicode","Home")">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>图标对应字体</cite>
+                            </a>
+                        </li>
+                        <li>
+                            <a _href="@Url.Action("FontAweSome","Home")">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>FontAweSome</cite>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- <div class="x-slide_left"></div> -->
+    <!-- 左侧菜单结束 -->
+    <!-- 右侧主体开始 -->
+    <div class="page-content">
+        <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+            <ul class="layui-tab-title">
+                <li class="home"><i class="layui-icon">&#xe68e;</i>我的桌面</li>
+              @*  <li class="test"><input id="testWidget" type="button" value="组  件"></li>*@
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <iframe src='@Url.Action("Default","Home")' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="page-content-bg"></div>
+    <!-- 右侧主体结束 -->
+    <!-- 中部结束 -->
+    <!-- 底部开始 -->
+    <div class="footer">
+        <div class="copyright">@ConfigWrap.GetValue("CopyRight")</div>
+    </div>
+    <!-- 底部结束 -->
+    <script type="text/javascript">
+        (function ($) {
+            $("#index_logout").click(function () {
+                $.ajax({
+                    url: '@Url.Action("Logout","Login")',
+                    type: "post",
+                    dataType: "json",
+                    success: function (data) {
+                        window.setTimeout(function () {
+                            window.location.href = '@Url.Action("Index","Login")';
+                        }, 50);
+                    }
+                });
+            });
+            //获取组建列表
+            @*$("#testWidget").click(function() {
+
+                @*$.ajax({
+                    url: '@Url.Action("GetWidgetList","Home")',
+                    type: "post",
+                    dataType: "json",
+                    success: function (data) {
+
+                        debugger;
+                        if (data != null) {
+                     
+
+                        }
+                    }
+                });*@
+             
+           // });
+
+
+        })($);
+    </script>
+
+</body>
+</html>

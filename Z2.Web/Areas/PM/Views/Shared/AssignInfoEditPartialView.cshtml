@@ -1,0 +1,311 @@
+﻿@model Z2.Core.WebApp.Model.Mst_TaskModel
+@{
+    var item = Model.Assigns;
+}
+<style>
+    #AssignTable{
+        width:100%;
+        height:auto;
+    }
+    #AssignTable tr td {
+        padding: 2px;
+    }
+
+    .AssignDiv {
+        width: 50px;
+        height: 20px;
+    }
+
+    .EstimateHour {
+        height: 20px;
+        width: 50px;
+    }
+
+    .Operate {
+        height: 20px;
+        display:inline;
+        width: 80px;
+    }
+    .AssignInput{
+        width:110px;
+        height:20px;
+    }
+</style>
+<script src="~/Content/js/jquery/jquery.tablednd.js"></script>
+<div>
+    <div style="float:right">
+        <a id="btnAddAssignInfo" authorize="yes" class="btn btn-primary"><i class="fa fa-plus">&nbsp;&nbsp;增加</i></a>
+    </div>
+    <div style="clear:both">
+    </div>
+    <div style="width:100%">
+        <from class="form" id="form">
+            <table id="AssignTable" style="width:100%"></table>
+        </from>
+        <div id="AssignTypeDiv" hidden>@Html.DropDownList("AssignType", (SelectList)ViewBag.AssignType, new { @class = "form-control required" })</div>
+        <div id="AssignUserDiv" hidden>@Html.DropDownList("AssignUserId", (SelectList)ViewBag.LogUserInfoList, new { @class = "form-control required" })</div>
+    </div>
+    <div hidden>
+        <label id="deleteRecord">0</label>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var i = "";
+    var taskId = "@Model.TaskId";
+    $(document).ready(function () {
+        $(".form-control").attr("autocomplete", "off");
+        $("#btnAddAssignInfo").click(function () {
+            btnAddAssignInfo();
+        });
+        $("#AssignTable").tableDnD({
+            scrollAmount: 0
+        });
+    })
+    function getGUID() {
+        $.ajax({
+            url: "@Url.Action("GetGUID", "Task")",
+            type: "POST",
+            dataType: "JSON",
+            success: function (result) {
+                i = "-" + result;
+                var data = { TaskAssignId: i, AssignTypeId: "", StartDate: "", DueDate: "", EstimatedHours: "", AssignDescription: "", AssignOrder: 0 };
+                var rowid = i;
+                $("#AssignTable").jqGrid("addRowData", rowid, data, "last");
+                //var id1 = "AssignTypeList" + i;
+                //var id2 = "AssignUserIdList" + i;
+                //$("#AssignType").clone().prependTo("#" + id1);
+                //$("#" + id1 + " " + "#AssignType").attr("id", id1);
+                //$("#AssignUserId").clone().prependTo("#" + id2);
+                //$("#" + id2 + " " + "#AssignUserId").attr("id", id2);
+            }
+        })
+    }
+    function isNum(obj) {
+        if (obj.value) {
+            obj.value = obj.value.replace(/[^\d.]/g, "");
+        }
+    }
+    function dragRow() {
+        $("#AssignTable").dataGrid('srotableRows', {
+            items: '.jqgrow:not(.unsortable)'
+        })
+    }
+    function btnAddAssignInfo() {
+        getGUID();
+    }
+    
+    function removeRow(obj) {
+        var msg = "你确认要删除数据吗？";
+        if (!confirm(msg) == true) {
+            return false;
+        }
+        var id = $(obj).attr("rowId");
+        var TaskAssignId = $(obj).attr("TaskAssignId");
+        $("#AssignTable").jqGrid("delRowData", id);
+        if (TaskAssignId[0] != "-") {
+            var str = $("#deleteRecord").html();
+            var value = str + "," + TaskAssignId;
+            $("#deleteRecord").html(value);
+        }
+    }
+    function getGridData() {
+        var a = $(".AssignTableStyle");
+        var dataArr = [];
+        var TaskAssignArr = [];
+        //得到总行数
+        for (var i = 0; i < a.length; i++) {
+            var TaskAssignCount = $(a[i]).attr("AssignCount");
+            if (TaskAssignCount == "AssignCount") {
+                var data = {
+                    TaskAssignId: $(a[i]).attr("TaskAssignId"),
+                }
+                TaskAssignArr.push(data);
+            }
+        }
+        //得到每行数据
+        for (var i = 0; i < TaskAssignArr.length; i++) {
+            var data = {
+                TaskAssignId: TaskAssignArr[i].TaskAssignId,
+                TaskId: "",
+                AssignTypeId: "",
+                AssignUserId: "",
+                StartDate: "",
+                DueDate: "",
+                EstimatedHours: 0,
+                AssignDescription: "",
+                AssignOrder: 0,
+            }
+            for (var j = 0; j < a.length; j++) {
+                var ControlPro = $(a[j]).attr("ControlPro");
+                var AssignType = $(a[j]).attr("AssignType");
+                var TaskAssignId = $(a[j]).attr("TaskAssignId");
+                if (ControlPro == "Div") {
+                    if (AssignType == "指派类型" && TaskAssignId == TaskAssignArr[i].TaskAssignId) {
+                        data.AssignTypeId = $(a[j]).children().val();
+                    } else if (AssignType == "指派给" && TaskAssignId == TaskAssignArr[i].TaskAssignId) {
+                        data.AssignUserId = $(a[j]).children().val();
+                    }
+                } else {
+                    if (AssignType == "TaskAssignId" && TaskAssignId == TaskAssignArr[i].TaskAssignId) {
+                        data.TaskAssignId = data[i].TaskAssignId;
+                    } else if (AssignType == "开始日期" && TaskAssignId == TaskAssignArr[i].TaskAssignId) {
+                        data.StartDate = $(a[j]).val();
+                    } else if (AssignType == "结束日期" && TaskAssignId == TaskAssignArr[i].TaskAssignId) {
+                        data.DueDate = $(a[j]).val();
+                    } else if (AssignType == "预计工时" && TaskAssignId == TaskAssignArr[i].TaskAssignId) {
+                        data.EstimatedHours = $(a[j]).val();
+                    } else if (AssignType == "描述" && TaskAssignId == TaskAssignArr[i].TaskAssignId) {
+                        data.AssignDescription = $(a[j]).val();
+                    } else if (AssignType == "操作" && TaskAssignId == TaskAssignArr[i].TaskAssignId) {
+                        //data.AssignOrder = $(a[j]).val();
+                    }
+                }
+            }
+            dataArr.push(data);
+        }
+        return dataArr;
+    }
+    function getAssignList() {
+        $("#AssignTable").dataGrid({
+            url: "@Url.Action("GetAssignDataList","Task")",
+            postData: {
+                taskId: taskId,
+            },
+            colModel: [
+                {
+                    label: "TaskAssignId", name: "TaskAssignId", hidden: true,
+                    formatter: function (cellValue, options, rowObject) {
+                        return "<label hidden TaskAssignId='" + cellValue + "' AssignCount='AssignCount' class='AssignTableStyle'></label>";
+                    }
+                },
+                {
+                    label: "指派类型", name: "AssignTypeId", align: "center", width: 80, sortable: false, fixed: true,
+                    formatter: function (cellValue, options, rowObject) {
+                        return "<div id='AssignTypeList" + rowObject.TaskAssignId + "' cellValue='" + cellValue + "' ControlPro='Div' AssignType='" + options.colModel.label + "' TaskAssignId='" + rowObject.TaskAssignId + "' class='AssignTableStyle'></div>";
+                    }
+                },
+                {
+                    label: "指派给", name: "AssignUserId", align: "center", width: 80, sortable: false, fixed: true,
+                    formatter: function (cellValue, options, rowObject) {
+                        if (cellValue)
+                        {
+                            return "<div id='AssignUserIdList" + rowObject.TaskAssignId + "' cellValue='" + cellValue + "' ControlPro='Div' AssignType='" + options.colModel.label + "' TaskAssignId='" + rowObject.TaskAssignId + "' class='AssignTableStyle'></div>"
+                        } else {
+                            return "<div id='AssignUserIdList" + rowObject.TaskAssignId + "' cellValue='' ControlPro='Div' AssignType='" + options.colModel.label + "' TaskAssignId='" + rowObject.TaskAssignId + "' class='AssignTableStyle'></div>"
+                        }
+                        
+                    }
+                },
+                {
+                    label: "开始日期", name: "StartDateStr1", align: "center", width: 150, sortable: false, fixed: true,
+                    formatter: function (cellValue, options, rowObject) {
+                        if (cellValue) {
+                            return "<input type='text' ControlPro='else' value=" + cellValue + " TaskAssignId='" + rowObject.TaskAssignId + "' AssignType='" + options.colModel.label + "' class='form-control input-wdatepicker AssignTableStyle'  onfocus='WdatePicker()' />";
+                        }
+                        else {
+                            return "<input type='text' ControlPro='else' class='form-control input-wdatepicker AssignTableStyle' TaskAssignId='" + rowObject.TaskAssignId + "' AssignType='" + options.colModel.label + "'  onfocus='WdatePicker()' />";
+                        }
+                    }
+                },
+                {
+                    label: "结束日期", name: "DueDateStr1", align: "center", width: 150, sortable: false, fixed: true,
+                    formatter: function (cellValue, options, rowObject) {
+                        if (cellValue) {
+                            return "<input type='text' ControlPro='else' value=" + cellValue + " class='form-control input-wdatepicker AssignTableStyle' TaskAssignId='" + rowObject.TaskAssignId + "' AssignType='" + options.colModel.label + "' onfocus='WdatePicker()' />";
+                        }
+                        else {
+                            return "<input type='text' ControlPro='else' class='form-control input-wdatepicker AssignTableStyle' TaskAssignId='" + rowObject.TaskAssignId + "' AssignType='" + options.colModel.label + "' onfocus='WdatePicker()' />";
+                        }
+                    }
+                },
+                {
+                    label: "预计工时", name: "EstimatedHours", sortable: false, width: 80, fixed: true,
+                    formatter: function (cellValue, options, rowObject) {
+                        if (cellValue) {
+                            return "<input type='text' ControlPro='EstimateHour' value=" + cellValue + " style='text-align:right;' onkeyup='isNum(this)' TaskAssignId='" + rowObject.TaskAssignId + "' AssignType='" + options.colModel.label + "' class='form-control required AssignTableStyle'/>";
+                        }
+                        else {
+                            return "<input type='text' ControlPro='EstimateHour' style='text-align:right;' onkeyup='isNum(this)' TaskAssignId='" + rowObject.TaskAssignId + "'  class='form-control required AssignTableStyle' AssignType='" + options.colModel.label + "'/>";
+                        }
+                    }
+                },
+                {
+                    label: "描述", name: "AssignDescription", align: "center", sortable: false, width: 150, fixed: false,
+                    formatter: function (cellValue, options, rowObject) {
+                        if (cellValue) {
+                            return "<input type='text' ControlPro='else' value=" + cellValue + "  class='form-control required AssignTableStyle' TaskAssignId='" + rowObject.TaskAssignId + "' AssignType='" + options.colModel.label + "'/>";
+                        }
+                        else {
+                            return "<input type='text' ControlPro='else' class='form-control required AssignTableStyle' TaskAssignId='" + rowObject.TaskAssignId + "' AssignType='" + options.colModel.label + "'/>";
+                        }
+                    }
+                },
+                {
+                    label: "操作", name: "AssignOrder", align: "center", width: 120, sortable: false, fixed: false,
+                    formatter: function (cellValue, options, rowObject) {
+                        return '<span ControlPro="Operate" class="glyphicon glyphicon-hand-up sortHandler AssignTableStyle" TaskAssignId="' + rowObject.TaskAssignId + '" AssignType="' + options.colModel.label + '"></span>&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-remove" TaskAssignId="' + rowObject.TaskAssignId + '" rowId="' + options.rowId + '" onclick=removeRow(this)></span>';
+                    }
+                },
+            ],
+            height: "auto",
+            //width:"100%",
+            rownumbers: false,
+            autowidth: true,
+            viewrecords: true,
+            sortable: true,
+            sortname: "AssignOrder",
+            gridComplete: function () {//表格加载执行
+                //var id1 = "AssignTypeList" + i;
+                //var id2 = "AssignUserIdList" + i;
+                //$("#AssignType").clone().prependTo("#" + id1);
+                //$("#AssignUserId").clone().prependTo("#" + id2);
+                var a = $(".AssignTableStyle");
+                for (var i = 0; i < a.length; i++) {
+                    var ControlPro = $(a[i]).attr("ControlPro");
+                    if (ControlPro == "Div") {
+                        $(a[i]).empty();
+                        var TaskAssignId = $(a[i]).attr("TaskAssignId");
+                        var id = "";
+                        var AssignType = $(a[i]).attr("AssignType");
+                        if (AssignType == "指派类型") {
+                            id = "AssignTypeList" + TaskAssignId;
+                            $("#AssignType").clone().prependTo("#" + id);
+                            var cellValue = $(a[i]).attr("cellValue");
+                            var newId = id + "Select";
+                            $("#" + id + " " + "#AssignType").attr("id", newId);
+                            $("#" + newId).addClass("AssignDiv");
+                            if (cellValue) {
+                                $("#" + newId).val(cellValue);
+                            }
+                        } else {
+                            id = "AssignUserIdList" + TaskAssignId;
+                            $("#AssignUserId").clone().prependTo("#" + id);
+                            var newId = id + "Select";
+                            $("#" + id + " " + "#AssignUserId").attr("id", newId);
+                            var cellValue = $(a[i]).attr("cellValue");
+                            $("#" + newId).addClass("AssignDiv");
+                            if (cellValue) {
+                                $("#" + newId).val(cellValue);
+                            }
+                        }
+                    } else if (ControlPro == "EstimateHour") {
+                        $(a[i]).addClass("EstimateHour");
+                    } else if (ControlPro == "Operate") {
+                        $(a[i]).addClass("Operate");
+                    } else {
+                        $(a[i]).addClass("AssignInput");
+                    }
+                }
+                //$(".AssignTableStyle").css("height", 20);
+                //$(".AssignTableStyle").css("width", 100);
+                $("#_empty", "#AssignTable").addClass("nodrag nodrop");//样式
+                $("#AssignTable").tableDnDUpdate();//更新jquery.tablednd.js插件的方法。
+            }
+        });
+        $("#AssignTable").jqGrid('sortableRows', {
+            items: '.jqgrow:not(.unsortable)',
+            handle: '.sortHandler',
+        });
+    }
+</script>

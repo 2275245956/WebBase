@@ -1,0 +1,231 @@
+﻿@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+<script>
+    var keyValue = $.request("keyValue");
+    $(function () {
+        initControl();
+        if (!!keyValue) {//  !!keyValue  是否存在keyValue
+            $.ajax({
+                url: "/Mall/ProductCategory/GetDetalisJson",
+                type: "Post",
+                data: { keyValue: keyValue },
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    $("#form1").formSerialize(data);//从后台拿到数据后绑定到form1
+                }
+            })
+        }
+    })
+
+    function initControl() {  //提供select控件中的值
+        $("#ParentId").bindSelect({
+            url: "/Mall/ProductCategory/GetTreeSelectJson",
+            type: 'post',
+        });
+    }
+    function reloadGrid() {
+        $("#gridList").resetSelection();
+        $("#gridList").trigger("reloadGrid  ");
+    }
+    function submitForm() {      //提交按钮事件
+        if (!$("#form1").formValid()) {//判断form1表单是否存在
+            return false;
+        }
+        var fileData = $("#upFile");
+        var FilePath=fileData[0].value;
+        var fileEntity = $("#form1").formSerialize();
+        var fileId = $("#upFile").attr("Id");
+        var url = "/Mall/ProductCategory/SubmitForm";
+        var objData = {
+            Id: fileEntity.Id,
+            ParentId: fileEntity.ParentId,
+            Layers: fileEntity.Layers,
+            ItemName: fileEntity.ItemName,
+            SubTitle: fileEntity.SubTitle,
+            ItemCode: fileEntity.ItemCode,
+            SimpleSpelling: fileEntity.SimpleSpelling,
+            TagText: fileEntity.TagText,
+            DisplayNo: fileEntity.DisplayNo,
+            CategoryImg: fileEntity.CategoryImg,
+            Path: fileEntity.Path,
+            EnabledFlag: fileEntity.EnabledFlag,
+            Description: fileEntity.Description,
+            PriceRange: fileEntity.PriceRange,
+            DisplayNo: fileEntity.DisplayNo
+        }
+        var sendData= {
+            keyValue: keyValue,
+            Id: fileEntity.Id,
+            ParentId: fileEntity.ParentId,
+            Layers: fileEntity.Layers,
+            ItemName:fileEntity.ItemName,
+            SubTitle: fileEntity.SubTitle,
+            ItemCode:fileEntity.ItemCode,
+            SimpleSpelling:fileEntity.SimpleSpelling,
+            DisplayNo:fileEntity.DisplayNo,
+            TagText:fileEntity.TagText,
+            DisplayNo:fileEntity.DisplayNo,
+            CategoryImg:fileEntity.CategoryImg,
+            Path: fileEntity.Path,
+            EnabledFlag: fileEntity.EnabledFlag,
+            Description: fileEntity.Description,
+            PriceRange: fileEntity.PriceRange,
+        }
+        ajaxFileUpload(fileId,url,sendData);
+    }
+
+    function ajaxFileUpload(elementId,url,sendData){   //ajax文件上传至服务器
+        var obj = {
+            url: url,//文件上传服务器请求地址
+            secureuri: false,
+            fileElementId: elementId,//文件上传控件的id属性
+            dataType: 'JSON',
+            type: 'POST',
+            data: sendData,
+            success: function (result) {
+                $.currentWindow().$("#gridList").resetSelection();
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+                $.modalClose();
+            },
+            erro: function (data, status, e) {
+                console.log("error");
+            }
+        };
+        $.ajaxFileUpload(obj);
+        return false;
+    }
+
+    function unloadFile(file) {
+        var fileName = file.files[0].name;
+        var fileType = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+        var fileTypeArr = [".jpg", ".png", ".gif"];
+        if (fileTypeArr.indexOf(fileType)!=-1) {
+            $("#CategoryImg").val(fileName);
+        }
+        else {
+            alert("只允许上传"+fileTypeArr+"类型的文件");
+        }
+    }
+</script>
+<style>
+      .FileSelectHide {
+        width: 80px;
+        height: 32px;
+        overflow: hidden;
+        position: relative;
+        background-image: none;
+        background-attachment: scroll;
+        background-repeat: no-repeat;
+        background-position-x: center;
+        background-position-y: center;
+        background-size: auto;
+        background-origin: padding-box;
+        background-clip: border-box;
+        background-color: transparent;
+        margin-top: -34px;
+    }
+
+        .FileSelectHide input {
+            height: 34px;
+            right: 0px;
+            bottom: 0px;
+            font-size: 20px;
+            filter: alpha(opacity=0);
+            -webkit-filter: opacity(0%);
+            position: absolute;
+            cursor: pointer;
+            outline-width: medium;
+            outline-style: none;
+            outline-color: invert;
+            opacity: 0;
+        }
+</style>
+<form id="form1">
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs">
+            <li role="presentation" class="active"><a href="#">基本信息</a></li>
+        </ul>
+        <div style="padding-top: 20px; margin-right: 30px;">
+            <table class="form">
+                <tr>
+                    <th class="formTitle ">上级</th>
+                    <td class="formValue">
+                        <select id="ParentId" name="ParentId" class="form-control required">
+                            <option value="0">父节点</option>
+                        </select>
+                    </td>
+                    <td id="Id" hidden></td>
+                    <th class="formTitle">产品名称</th>
+                    <td class="formValue">
+                        <input id="ItemName" name="ItemName" type="text" class="form-control required" placeholder="请输入名称" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">产品编号</th>
+                    <td class="formValue">
+                        <input id="ItemCode" name="ItemCode" type="text" class="form-control required" placeholder="请输入名称"  />
+                    </td>
+                    <th class="formTitle">产品简称</th>
+                    <td class="formValue">
+                        <input id="SimpleSpelling" name="SimpleSpelling" type="text" class="form-control required" placeholder="请输入名称" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">产品价格范围</th>
+                    <td class="formValue">
+                        <input id="PriceRange" name="PriceRange" type="text" class="form-control required" placeholder="请输入名称"  />
+                    </td>
+                    <th class="formTitle">产品副标题</th>
+                    <td class="formValue">
+                        <input id="SubTitle" name="SubTitle" type="text" class="form-control required" placeholder="请输入显示顺序" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">产品图标</th>
+                    <td class="formValue">
+                        <input type="text" id="CategoryImg" name="CategoryImg" class="form-control fileWidth"  readonly="readonly"/>
+                    </td>
+                    <td class="formValue fileEle">
+                        <input type="button" value="选择文件" id="btnFileSelect" class="btn btn-primary" />
+                        <div class="FileSelectHide">
+                            <input id="upFile" name="upFile" type="file" class="addFile" onchange="unloadFile(this)" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">显示顺序</th>
+                    <td class="formValue">
+                        <input id="DisplayNo" name="DisplayNo" type="text" class="form-control" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle" style="height: 35px;">选项</th>
+                    <td class="formValue" colspan="3" style="padding-top: 1px;">
+                        <div class="ckbox">
+                            <input id="EnabledFlag" name="EnabledFlag" type="checkbox" checked="checked"><label for="EnabledMark">有效</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle" valign="top" style="padding-top: 5px;">
+                        产品附加说明
+                    </th>
+                    <td class="formValue" colspan="3">
+                        <textarea id="TagText" name="TagText" class="form-control" style="height: 60px;"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle" valign="top" style="padding-top: 5px;">
+                        介绍
+                    </th>
+                    <td class="formValue" colspan="3">
+                        <textarea id="Description" name="Description" class="form-control" style="height: 100px;"></textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>

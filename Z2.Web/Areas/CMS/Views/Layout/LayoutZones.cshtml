@@ -1,0 +1,124 @@
+﻿
+@using Newtonsoft.Json
+@using Senparc.CO2NET.Extensions
+@using Z2.Core.WebApp.Model
+@using Z2.Core.WebApp.Repository
+@model Z2.Web.Areas.CMS.Common.LayoutZonesViewModel
+@{
+    Layout = null;
+    string returnUrl = Url.Action("LayoutWidget", "Layout", new { module = "admin", Model.LayoutID });
+    var noZoneWidgets = Model.Widgets.Where(m => Model.Zones.All(n => n.ID != m.ZoneId));
+    LayOutRep layOutRep = new LayOutRep();
+}
+
+@if (noZoneWidgets.Any())
+{
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <span class="badge">须要处理</span>
+        </div>
+        <div class="panel-body">
+            <ul id="noZoneWidgets" class="fullRowList">
+                @foreach (var widget in noZoneWidgets.OrderBy(m => m.Position))
+                {
+                    <li id="widget_@widget.ID" class="widget" data-widgetid="@widget.ID">
+
+                        <a href="@Url.Action("Edit", "Widget", new RouteValueDictionary() { {"Area","CMS"},{"Id",widget.ID} })"><i class="glyphicon glyphicon-edit"></i></a>
+                        <a href="javascript:void(0)" class="delete" data-widgetid="@widget.ID"><i class="glyphicon glyphicon-trash"></i></a>
+
+                        @widget.WidgetData
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="panel-footer">
+            <span class="description">
+                组件不能正确地显示在页面中，可能是因为您删除了原先的区域
+            </span>
+        </div>
+    </div>
+}
+<div class="panel  panel-default simplePreview">
+    <div class="panel-heading">布局概览</div>
+
+    <div class="simpleDesign" id="panelZone" layoutId="@Model.LayoutID">
+        @for (int i = 0; i < Model.LayoutHtml.Count; i++)
+        {
+
+            var itemHtml = Model.LayoutHtml[i];
+            if (itemHtml.Html == CMS_Zone.ZoneTag)
+            {
+                i++;
+                itemHtml = Model.LayoutHtml[i];
+                var zone = layOutRep.GetZoneList(itemHtml.Html);
+
+
+                <div class="panel panel-success  panel-relative">
+                    <div class="panel-toolbar">
+                        <a class="label label-danger" target="_parent" title="添加组件到该区域" href="@Url.Action("SelectWidget", "Widget", new RouteValueDictionary() { { "Area", "CMS" }, { "PageId", Model.PageID }, { "ZoneId", zone.ID }, { "LayoutId", Model.LayoutID } })">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        @zone.ZoneName
+                        </a>
+                    </div>
+                    <ul data-zoneid="@zone.ID" class="fullRowList widgets connectedSortable">
+                        @foreach (var widget in Model.Widgets.Where(m => m.ZoneId == zone.ID).OrderBy(m => m.Position))
+                        {
+                            <li id="widget_@widget.ID" class="widget" data-widgetid="@widget.ID">
+
+                                @*组件必须实现的Setting发方法  传入一个Id
+                                    通过WidgetId来 查询SysWidget表中的SetUrlAddress 来进行编辑
+                                *@
+
+                                <a href="@Url.Action("Edit", "Widget", new RouteValueDictionary() { {"Area","CMS"},{"Id",widget.ID} })"><i class="glyphicon glyphicon-edit"></i></a>
+                                <a href="javascript:void(0)" class="delete" data-widgetid="@widget.ID"><i class="glyphicon glyphicon-trash"></i></a>
+                                @widget.WidgetData
+
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+
+                i++;
+            }
+            else
+            {
+                @Html.Raw(itemHtml.Html)
+            }
+        }
+    </div>
+
+</div>
+<script type="text/javascript">
+    $("#noZoneWidgets>.widget").draggable({ revert: "invalid", connectToSortable: ".widgets" });
+    $(".widgets").sortable({
+        connectWith: ".connectedSortable",
+        tolerance: "pointer",
+        placeholder: "sorting",
+        stop: function (event, ui) {
+            ui.item.removeAttr("style");
+            var target = ui.item.parent();
+            var widgets = [];
+            target.children().each(function (i, ui) {
+                widgets.push({
+                    ID: $(ui).data("widgetid"),
+                    ZoneId: target.data("zoneid"),
+                    Position: i + 1,
+                    LayoutId: $("#panelZone").attr("layoutId")
+                });
+            });
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("SavePosition", "Widget",new RouteValueDictionary() { {"Area","CMS"} })',
+                dataType: 'json',
+                contentType: "application/json;charset=utf-8",
+                async: true,
+                data: JSON.stringify(widgets),
+                success: function () {
+                }
+            });
+        }
+    });
+
+
+</script>

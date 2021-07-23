@@ -1,0 +1,28 @@
+﻿@using DocumentFormat.OpenXml.EMMA
+@using Z2.Core.WebApp.Model
+@using Z2.Core.WebApp.Repository
+@model  IEnumerable<Z2.Core.WebApp.Model.CMS_LayoutHtml>
+@{
+    ViewBag.Title = "Design";
+    Layout = "~/Views/Shared/_DesignLayout.cshtml";
+    LayOutRep LayOutRep = new LayOutRep();
+}
+
+@for (int i = 0; i < Model.Count(); i++)
+{
+
+    @Html.Raw(Model.ToList()[i].Html);
+
+    if (Model.ToList()[i].Html == CMS_Zone.ZoneTag)
+    {
+        i++;
+
+        var zones = LayOutRep.GetZoneList(Model.ToList()[i].Html);
+        if (zones != null)
+        {
+            <input class="form-control" type="text" name="ZoneName" placeholder="输入名称" value="@zones.ZoneName" />
+            <input class="form-control" type="hidden" name="LayoutId" value="@zones.LayoutId" />
+            <input class="form-control" type="hidden" name="ID" value="@zones.ID" />
+        }
+    }
+}

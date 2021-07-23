@@ -1,0 +1,461 @@
+﻿@using Z2.Core.WebApp.Repository
+@using Z2.Core.WebApp.Model
+@using Z2.Core.WebApp.Enums
+
+@model Z2.Core.WebApp.Model.Mst_TaskModel
+@{
+    ViewBag.Title = "TaskPreView";
+    Layout = "~/Views/Shared/_Form.cshtml";
+    var taskDetails = Model.TaskDetails;
+    TaskDetailRep pm = new TaskDetailRep();
+    //List<pm_TaskDetail> data = null;
+
+    //if (pm.GetModelDetail("1") != null)
+    //{
+    //    data = pm.GetModelDetail("1");
+    //}
+
+    var taskTitle = Model.TaskName;
+    if (!string.IsNullOrEmpty(Model.LinkTaskId))
+    {
+        taskTitle = string.Format("#{0}-{1}", Model.LinkTaskId, Model.TaskName);
+    }
+}
+
+<style>
+    .mainDiv {
+        padding: 0 20px;
+        overflow-y: auto;
+    }
+
+    .leftDiv {
+        width: 88px;
+        float: left;
+    }
+
+    .rightDiv {
+        float: left;
+    }
+
+    .leftCellDiv {
+        width: 15%;
+    }
+
+    .rightCellDiv {
+        width: 10%;
+    }
+
+    .rowTable {
+        width: 98%;
+        table-layout:fixed;
+        /*margin-left: -205px;*/
+    }
+
+    .rowTable td {
+        width: 16%;
+        padding: 0px 20px;
+    }
+
+    /*.rowTable th {
+        text-align:center;
+        width:50px
+    }*/
+
+    .rowDiv {
+        padding: 10px 0px;
+    }
+
+    .FileSelectHide {
+        width: 80px;
+        height: 32px;
+        overflow: hidden;
+        position: relative;
+        background-image: none;
+        background-attachment: scroll;
+        background-repeat: no-repeat;
+        background-position-x: center;
+        background-position-y: center;
+        background-size: auto;
+        background-origin: padding-box;
+        background-clip: border-box;
+        background-color: transparent;
+        margin-top: -34px;
+    }
+
+        .FileSelectHide input {
+            height: 34px;
+            right: 0px;
+            bottom: 0px;
+            font-size: 20px;
+            filter: alpha(opacity=0);
+            -webkit-filter: opacity(0%);
+            position: absolute;
+            cursor: pointer;
+            outline-width: medium;
+            outline-style: none;
+            outline-color: invert;
+            opacity: 0;
+        }
+
+    i:hover {
+        cursor: pointer !important;
+    }
+
+    .div_top {
+        position: relative;
+        width: 100%;
+        height: 60%;
+        border: none;
+        float: left;
+        left: 10px;
+        z-index:1;
+    }
+
+    .div_middle {
+        position: absolute;
+        height: 33%;
+        border: none !important;
+        float: left;
+        margin-bottom:-30px;
+        z-index:2;
+    }
+
+    .div_bottom {
+        width: 100%;
+        height: auto !important;
+        max-height: 100% !important;
+        border: none !important;
+        position: relative;
+        top: 5px;
+        float: left;
+        padding-bottom: 10px !important;
+    }
+
+    .div_type {
+        position: relative;
+        width: 96%;
+        height: 40px;
+        border: none;
+        float: left;
+        font-size: 14px;
+    }
+
+    .div_content {
+        position: relative;
+        width: 96%;
+        height: auto;
+        border: none;
+        float: left;
+        font-size: 14px;
+        min-height: 30px !important;
+    }
+
+    .ProcessType {
+        position: relative;
+        float: left;
+        left: 40px !important;
+        height: 100% !important;
+        width: 90% !important;
+    }
+
+    #Description_Text {
+        width: 90%;
+    }
+</style>
+<script src="~/Content/js/ueditor/ueditor.config.js"></script>
+<script src="~/Content/js/ueditor/ueditor.all.js"></script>
+<script src="~/Content/js/ueditor/ueditor.parse.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //getDescription();
+        uParse('#content', {
+            rootPath: '@Url.Content("~/Content/js/ueditor")'
+        })
+
+        console.log('@Model.TaskDescription');
+    })
+
+    function reloadGrid() {
+        $.reload();
+    }
+
+    @*function getDescription() {
+        $.ajax({
+            url: "@Url.Action("GetDescription")",
+            data: { TaskId: "@Model.TaskId" },
+            dataType: 'json',
+            type: "post",
+            success: function (result) {
+                initEditorWidth(result);
+            },
+            error: function (a, b, c) {
+                console.log("cuowu");
+            }
+        })
+    }*@
+
+    //function initEditorWidth(data) {
+    //    var width = $("#testDiv").innerWidth();
+    //    var ue = new UE.ui.Editor({ initialFrameWidth: width, toolbars:[] });
+    //    ue.render("container");
+    //    ue.ready(function () {
+    //        ue.setContent(data.TaskDescription);
+    //        ue.setDisabled();
+    //    })
+    //}
+
+    function deleteFile(data) {
+        var fileID = data.id;
+        $.deleteForm({
+            url: "@Url.Action("DeleteFile")?fileID=" + fileID,
+            type: "POST",
+            success: function (result) {
+                var str = "#div_" + fileID;
+                location.reload();
+                $(str).detach();
+            }
+        })
+    }
+    function btnAlert() {
+        $.modalOpen({
+            id: "Form",
+            title: "编辑任务",
+            url: '@Url.RouteUrl("PM_default", new { controller = "Task", action = "EditTask",TaskId=Model.TaskId })',
+            width: "900px",
+            height: "600px",
+            callBack: function (iframeId) {
+                    top.frames[iframeId].submitForm();
+                }
+            })
+    }
+    function btnEdit() {
+        var taskID = "1";
+        $.modalOpen({
+            id: "Form2",
+            title: "任务信息",
+            url: "@Url.Action("EditData")?keyValue=" + taskID,
+            width: "900px",
+            height: "650px",
+            resize:false,
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+                $.currentWindow().reload();
+            },
+        });
+    }
+    function btnBack() {
+        //window.location.href = "@Url.Action("Index")";
+        $.closeCurrentWindow();
+    }
+</script>
+<div style="margin:20px 20px">
+    <div class="btn-group" style="float:left">
+        <a class="btn btn-primary" onclick="$.reload()"><span class="glyphicon glyphicon-refresh"></span></a>
+    </div>
+    <div style="float:right;">
+        <button id="btnAlert" authorize="yes" class="btn btn-primary" onclick="btnAlert()" style="margin-right:18px;"><i class="fa fa-pencil-square-o"></i>&nbsp;&nbsp;修改</button>
+        <button id="btnBack" authorize="yes" class="btn btn-primary" onclick="btnBack()" style="margin-right:-7px;"><i class="fa fa-chevron-right">&nbsp;&nbsp;关闭</i></button>
+    </div>
+    <div style="clear:both"></div>
+</div>
+<div id="mainDiv" class="mainDiv">
+    <div class="rowDiv">
+        <div >
+            <h2 style="margin-top:0px;">@taskTitle</h2>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div class="rowDiv">
+        <table class="rowTable">
+            <tr>
+                <th style="text-align:right;width:50px">项目</th>
+                <td style="text-align:left"><label id="StartDate" name="StartDate">@Model.ProjectName</label></td>
+                <th style="text-align:right;width:150px">优先级/类型</th>
+                <td style="text-align:left"><label id="DueDate" name="DueDate">@Model.TaskPriorityStr / @TaskView.ToEnum(Model.TaskCategory)</label></td>
+                <th style="text-align:right;width:150px">进度(%)</th>
+                <td style="text-align:left">
+                    <label id="EstimatedHours" name="EstimatedHours">@Model.TaskPercent </label>
+                </td>
+            </tr>
+        </table>
+
+        <div style="clear:both"></div>
+    </div>
+    <div class="rowDiv">
+        <table class="rowTable">
+            <tr>
+                <th style="text-align:right;width:50px">开始日期</th>
+                <td style="text-align:left"><label id="StartDate" name="StartDate">@string.Format("{0:yyyy-MM-dd}", Model.StartDate)</label></td>
+                <th style="text-align:right;width:150px">预计结束日期</th>
+                <td style="text-align:left"><label id="DueDate" name="DueDate">@string.Format("{0:yyyy-MM-dd}", Model.DueDate)</label></td>
+                <th style="text-align:right;width:150px">工时(预计/实际)</th>
+                <td style="text-align:left"><label id="EstimatedHours" name="EstimatedHours">@string.Format("{0}/{1}", Model.EstimatedHours,Model.ActualHours)</label></td>
+            </tr>
+        </table>
+        <div style="clear:both"></div>
+    </div>
+    @*<div class="rowDiv">
+        <table class="rowTable">
+            <tr>
+                <th style="text-align:right;width:50px">指派开发</th>
+                <td style="text-align:left"><label id="DevUserId" name="DevUserId">@Model.DevUserName / @Model.DevEstimatedHours</label></td>
+                <th style="text-align:right;width:150px">指派review</th>
+                <td style="text-align:left"><label id="ReviewUserId" name="ReviewUserId">@Model.ReviewUserName / @Model.ReviewEstimatedHours</label></td>
+                <th style="text-align:right;width:150px">指派测试</th>
+                <td style="text-align:left"><label id="TestUserId" name="TestUserId">@Model.TestUserName / @Model.TestEstimatedHours</label></td>
+            </tr>
+        </table>
+    </div>*@
+    <div class="rowDiv">
+        <table class="rowTable">
+            <tr>
+                <th style="text-align:right;width:50px">返工</th>
+                <td style="text-align:left"><label id="DevUserId" name="DevUserId">@Model.LoopCount</label></td>
+                <th style="text-align:right;width:150px">任务状态</th>
+                <td style="text-align:left"><label id="TaskStatus" name="TaskStatus">@Model.TaskStatusStr</label></td>
+                <th style="text-align:right;width:150px"></th>
+                <td style="text-align:left"><label id="TaskStatus" name="TaskStatus"></label></td>
+            </tr>
+        </table>
+    </div>
+    @*<hr style="width:100% !important;background-color:#c7c4bb;height:1px;border:none !important" />*@
+    <div class="rowDiv" >
+        <table class="table table-bordered" style="width:100%">
+                <tr>
+                    <th style="text-align:left;">类型</th>
+                    <th style="text-align:left;">姓名</th>
+                    <th style="text-align:center;">开始日期</th>
+                    <th style="text-align:center;">预计结束日期</th>
+                    <th style="text-align:right;">预计工时</th>
+                    <th style="text-align:right;">进度(%)</th>
+                    <th style="text-align:left;width:40%;">描述</th>
+                    <th style="text-align:center;width:100px;"></th>
+                </tr>
+            @foreach (var Assign in Model.Assigns.OrderBy(m=>m.AssignOrder))
+            {
+                if (!string.IsNullOrEmpty(Assign.TaskAssignId))
+                {
+                <tr>
+                    <td style="text-align:left;">@Assign.AssignTypeName</td>
+                    <td style="text-align:left;">@Assign.AssignUserName</td>
+                    <td style="text-align:center;">@Assign.StartDateStr</td>
+                    <td style="text-align:center;">@Assign.DueDateStr</td>
+                    <td style="text-align:right;">@Assign.EstimatedHours</td>
+                    <td style="text-align:right;">@Assign.AssignPercent</td>
+                    <td style="text-align:left;">@Assign.AssignDescription</td>
+                    <td style="text-align:center;">
+                        <button onclick="btnAdd(this)" TaskAssignId="@Assign.TaskAssignId" AssignUserId="@Assign.AssignUserId" AssignTypeName="@Assign.AssignTypeName" AssignTypeId="@Assign.AssignTypeId" type="button" class="btn  btn-primary" style="margin-right:13px;"><i class="fa fa-plus"></i>&nbsp;&nbsp;对应内容</button>
+                    </td>
+                </tr>
+                }
+            }
+        </table>
+    </div>
+    <hr style="width:100% !important;background-color:#c7c4bb;height:1px;border:none !important" />
+    <div class="rowDiv">
+        <div  style="width:98%;" id="testDiv">
+            <div type="text/plain" id="container" name="content" style="width:100%;">
+                @Html.Raw(Model.TaskDescription)
+            </div>
+
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div class="rowDiv" id="fileContainer">
+        @{
+            foreach (var item in taskDetails)
+            {
+                foreach (var taskFile in item.TaskFiles)
+                {
+                    if (!string.IsNullOrEmpty(taskFile.FilePath))
+                    {
+                        <div id="div_@taskFile.Id">
+                            <i class="fa  fa-paperclip"></i>&nbsp;&nbsp;
+                            <a target='_blank' style="color: #569cd6;text-decoration: none" href='@Url.RouteUrl("PM_Image",new { controller = "Task", action = "DownLoadFile", taskfileid = taskFile.Id, fileName = taskFile.FileName.Replace(".", "_") })' class='DownLoadFile'>@taskFile.FileName&nbsp;&nbsp;<i class="fa fa-download" style="color:#5e656d"></i>&nbsp;&nbsp;</a>
+                            <label>&nbsp;&nbsp; @taskFile.CreateUserName &nbsp;&nbsp;  @taskFile.CreateDateTime</label>&nbsp;&nbsp;
+                            <i class="fa fa-trash" id="@taskFile.Id" onclick="deleteFile(this)"></i>
+                            @*<a href="#" id="@taskFile.Id" onclick="deleteFile(this) "><span class="glyphicon glyphicon-trash"></span></a>*@
+                        </div>
+                    }
+                }
+            }
+        }
+    </div>
+    <div style="float:right;margin:20px -10px 20px 0px;">
+        @*<a id="@Model.TaskId" authorize="yes" class="btn btn-primary" onclick="btnAdd(this)"><span class="glyphicon glyphicon-plus">&nbsp;对应内容</span></a>*@
+        <button onclick="btnAdd(this)" type="button" class="btn  btn-primary" style="margin-right:13px;"><i class="fa fa-plus"></i>&nbsp;&nbsp;对应内容</button>
+    </div>
+    <div id="partialDiv">
+        @for (int i = 0; i < taskDetails.Count; i++)
+        { <div>
+            <div>
+                <hr style="width:100% !important;background-color:#c7c4bb;height:1px;border:none !important" />
+            </div>
+            @Html.Partial("_TaskDetailPartialView", taskDetails[i])
+        </div>
+        }
+    </div>
+    <div id="main_bottom" style="clear:both;width:100% !important;border:none!important;">
+
+    </div>
+</div>
+
+<script>
+    //增加任务详细
+    function btnAdd(obj) {
+        var TaskAssignId = $(obj).attr("TaskAssignId");
+        var AssignTypeName = $(obj).attr("AssignTypeName");
+        var AssignTypeId = $(obj).attr("AssignTypeId");
+        var AssignUserId = $(obj).attr("AssignUserId");
+        var url = "";
+        if (TaskAssignId) {
+            url = "@Url.Action("DetailEdit","TaskDetail")?TaskId=" + "@Model.TaskId" + "&TaskAssignId=" + TaskAssignId + "&AssignUserId=" + AssignUserId ;//+ "&AssignTypeName="+AssignTypeName;
+        }else{
+            url= "@Url.Action("DetailEdit","TaskDetail")?TaskId=" + "@Model.TaskId"
+        }
+        $.modalOpen({
+            id: "Form",
+            title: "任务信息",
+            url: url,
+            width: "900px",
+            height: "550px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+            },
+
+        });
+
+
+    }
+    @*部分试图的方法*@
+
+    //编辑
+    function Edit(obj) {
+        var tskId = $(obj).attr("tskId");
+        var tskDelId = $(obj).attr("tskDelId");
+        $.modalOpen({
+            id: "Form",
+            title: "任务信息",
+            url: "@Url.Action("DetailEdit","TaskDetail")?TaskId=" + tskId + "&TaskDetailId=" + tskDelId,
+            width: "900px",
+            height: "550px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+
+            },
+
+        });
+
+    }
+
+    function AddFileInfo(data) {
+        var array = [];
+        array.push("<div id='div_" + data.Id + "'>");
+        array.push("<i class='fa fa-paperclip'></i>&nbsp;&nbsp;");
+        array.push("<a href='" + data.FilePath + "' id='file_" + data.Id + "' filename='" + data.FileName + "' style='color: #569cd6;text-decoration: none'>" + data.FileName + "&nbsp;&nbsp;<i class='fa fa-download' style='color:#5e656d'></i></a>&nbsp;&nbsp;");
+        array.push("<span class='CreaterUserId'>" + data.CreateUserName + " </span>");
+        array.push("<span class='CreateDateTime'>" + data.CreateDateTime + " </span>&nbsp;&nbsp;");
+        array.push("<i class='fa fa-trash' onclick='delFile(this)' key='" + data.Id + "'></i></div>");
+        $("#fileContainer").prepend(array.join(""));
+    }
+</script>

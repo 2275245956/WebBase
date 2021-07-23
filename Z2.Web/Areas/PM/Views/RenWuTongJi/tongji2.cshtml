@@ -1,0 +1,145 @@
+﻿
+@{
+    var monthStart = DateTime.Parse(string.Format("{0:yyyy-MM-01}", DateTime.Now.Date));
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+
+<style type="text/css">
+
+    .TaskName {
+        color: #0563C1;
+        text-decoration: underline;
+        cursor:pointer;
+    }
+</style>
+
+<div class="topPanel">
+    <div class="toolbar">
+        @Html.Partial("~/Views/Shared/_Partial_LoadButtons.cshtml")
+    </div>
+    @*<div class="search">
+            <table>
+                <tr>
+                    <td>
+                        <div class="input-group">
+                            <input id="txt_keyword" type="text" class="form-control" placeholder="@Resources.BaseRes.Name/@Resources.BaseRes.EnCode" style="width: 200px;">
+                            <span class="input-group-btn">
+                                <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>*@
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <label for="WorkerId" style="margin-left:5px;">年月：</label>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <input id="SearchData" type="text" class="form-control" style="width: 200px;" onfocus="WdatePicker({ dateFmt: 'yyyy-MM' })" value="@string.Format("{0:yyyy-MM}",DateTime.Now)">
+
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>
+
+<script>
+
+    $(function () {
+        initGrid();
+
+         $(document).on("click",
+                '.TaskName',
+                function () {
+                    //$.addTab();
+                    var taskId = $(this).attr("TaskId")
+                    var startDate = $(this).attr("startDate")
+                    var endDate = $(this).attr("endDate")
+                    var title = $(this).text();
+                    var url = '@Url.Action("TaskPreView", "Task")' + '?TaskID=' + taskId + '&startDate=' + taskHelper.nullToEmpty(startDate) + '&endDate=' + taskHelper.nullToEmpty(endDate);
+                    @*var url2 = '@Url.RouteUrl("SystemManage_default", new {action = "Index", controller = "Organize"})';
+                    console.log(url2);*@
+                    $.addNewWindow('详细', url); ///SystemManage/Organize/Index
+
+                });
+    })
+
+    function initGrid() {
+
+        var SearchData = $("#SearchData").val();
+
+        var $gridList = $("#gridList");
+        var windowWidth = $(window).width();
+        $gridList.dataGrid({
+            url: '@Url.Action("GetGridData2")',
+            postData:{ SearchData: SearchData },
+            width: windowWidth,
+            colModel: [
+                { label: "Id", name: "TaskId", hidden: true, key: true},
+                //{ label: "任务Id", name: "TaskId", width: 100, fixed: true, align: "left", sortable: false},
+                //{ label: "项目Id", name: "ProjectId", width: 100, fixed: true, align: "center", sortable: false }, 
+                { label: "项目名称", name: "ProjectName", width: 200, fixed: true, align: "left", sortable: false },
+                { label: "任务名称", name: "TaskName", width: windowWidth - 450, fixed: true, align: "left", formatter: taskHelper.formatterTaskName, sortable: false },
+                { label: "工作时长", name: "ActualHours", width: 100, fixed: true, align: "right", formatter: taskHelper.formatterActualHours, sortable: false }
+            ],
+            rownumbers: true,
+            pager: "#gridPager",
+            sortname: 'DisplayNo',
+            viewrecords: true
+        })
+
+        $("#btn_search").click(function () {
+            //刷新jqgrid的数据
+            $gridList.jqGrid('setGridParam', {
+                postData: { SearchData: $("#SearchData").val() }
+            }).trigger('reloadGrid');//重新载入
+        });
+
+    } 
+
+    var taskHelper = {
+        formatterTaskName: function (cellvalue, options, rowObject) {
+
+            var url = '@Url.Action("TaskPreView", "Task")' + '?taskId=' + rowObject.TaskId;
+            var cells = cellvalue;
+            if (rowObject.LinkTaskId) {
+                cells = "#" + rowObject.LinkTaskId + "-" + cellvalue;
+
+            }
+
+            return '<a href="javascript:void(0);" class="TaskName" TaskId="' + rowObject.TaskId + '">' + cells + '</a>';
+        },
+        formatterActualHours: function (cellvalue, options, rowObject) {
+            var SearchData = $("#SearchData").val();
+            var startDate = new Date(SearchData + '-01');
+            var endDate = new Date(new Date(SearchData + '-01').setMonth(startDate.getMonth() + 1));           
+
+            var url = '@Url.Action("TaskPreView", "Task")' + '?taskId=' + rowObject.TaskId + '&startDate=' + taskHelper.dateFormat(startDate) + '&endDate=' + taskHelper.dateFormat(endDate);
+            var cells = cellvalue;
+            if (rowObject.LinkTaskId) {
+                cells = "#" + rowObject.LinkTaskId + "-" + cellvalue;
+            }
+            return '<a href="javascript:void(0);" class="TaskName" TaskId="' + rowObject.TaskId + '"  startDate="' + taskHelper.dateFormat(startDate) + '"  endDate="' + taskHelper.dateFormat(endDate) + '">' + cells + '</a>';
+        },
+        dateFormat: function (dt) {
+            return dt.getFullYear() + '-' + (dt.getMonth() + 1) + '-' + dt.getDate();
+        },
+        nullToEmpty: function (obj) {
+            return obj ? obj : '';
+        }
+    }
+
+</script>

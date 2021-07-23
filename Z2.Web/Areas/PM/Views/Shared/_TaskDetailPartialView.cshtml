@@ -1,0 +1,194 @@
+﻿@using Z2.Core.WebApp.Model
+@using Z2.Core.WebApp.Repository
+@model Z2.Core.WebApp.Model.pm_TaskDetail
+@{
+    var showResultType_Bool = new[] {  "Test" , "Review" };
+    var item = Model;
+    if (!string.IsNullOrEmpty(item.TaskContent))
+    {
+        item.TaskContent = item.TaskContent.Replace("\n", "<br/>");
+    }
+    var files = item.TaskFiles;
+    var ResultList = (Dictionary<string, string>)ViewBag.ResultList;
+    var FileTypeList = (Dictionary<string, string>)ViewBag.FileTypeList;
+    var BugTypeList = (Dictionary<string, string>)ViewBag.BugTypeList;
+}
+
+@functions{
+}
+
+<style>
+    .div_middle {
+        width: 100%;
+    }
+</style>
+<script src="~/Content/js/UploadFile/ajaxfileupload.js"></script>
+<script>
+    //上传文件
+    function upFile(obj) {
+        var taskId = $(obj).attr("tskId");
+        var delId = $(obj).attr("delId");
+        var fileName = obj.files[0].name;
+        var fileId = $(obj).attr("id");
+        var url = "@Url.Action("UpFile","TaskDetail")";
+        var sendData = {
+            TaskId: taskId,
+            TaskDetailId: delId,
+            FileName: fileName,
+        };
+
+        ajaxFileUpload(fileId, url, sendData);
+    }
+    function ajaxFileUpload(elementId, url, sendData) {
+        var obj = {
+            url: url,//用于文件上传的服务器端请求地址
+            secureuri: false,
+            fileElementId: elementId,//文件上传空间的id属性
+            type: 'Post',
+            dataType: 'json',
+            data: sendData,
+            success: function (result) {  //服务器成功响应处理函数
+                //$.reload();
+                showNewFile(result.messageValue);
+            },
+
+        };
+        $.ajaxFileUpload(obj);
+        return false;
+    }
+    function showNewFile(data) {
+        var ul = $("#ul_" + data.TaskDetailId);
+        var array = [];
+        array.push("<li id='li_" + data.Id + "'>");
+        array.push("<i class='fa fa-paperclip'></i>&nbsp;&nbsp;");
+        array.push("<a href='" + data.FilePath + "' id='file_" + data.Id + "' filename='" + data.FileName + "' style='color: #569cd6;text-decoration: none'>" + data.FileName + "&nbsp;&nbsp;<i class='fa fa-download' style='color:#5e656d'></i></a>&nbsp;&nbsp;");
+        array.push("<span class='CreaterUserId'>" + data.CreateUserName + " </span>");
+        array.push("<span class='CreateDateTime'>" + data.CreateDateTime + " </span>&nbsp;&nbsp;");
+        array.push("<i class='fa fa-trash' onclick='delFile(this)' key='" + data.Id + "'></i></li>");
+        ul.prepend(array.join(""));
+        AddFileInfo(data);
+    }
+    //删除文件
+    function delFile(obj) {
+        var fileId = $(obj).attr("key");
+        $.deleteForm({
+            url: "@Url.Action("DeleteFile","Task")?FileID=" + fileId,
+            success: function (result) {
+                $("#li_" + result.messageValue).detach();
+                $("#div_" + result.messageValue).detach();
+            }
+        });
+    }
+</script>
+<div style="position:relative;width:100%;height:auto !important;max-height:100% !important; " id="div_@item.TaskDetailId">
+    <div class="div_middle">
+        <div style="float: right;margin-right: -10px;">
+            <button id="btnFileSelect" type="button" class="btn  btn-primary"><i class="fa fa-plus"></i>&nbsp;&nbsp;附件</button>
+            <div class="FileSelectHide">
+                <input name="upFile" type="file" id="upFile_@item.TaskDetailId" delId="@item.TaskDetailId" tskId="@item.TaskId" onchange="upFile(this)" />
+            </div>
+        </div>
+        <div style="float: right;margin-right:20px;">
+            <button tskId="@item.TaskId" tskDelId="@item.TaskDetailId" onclick="Edit(this)" type="button" class="btn  btn-primary"><i class="fa fa-pencil-square-o"></i>&nbsp;&nbsp;修改</button>
+        </div>
+    </div>
+    <div class="div_top">
+        <div class="div_type">
+            <div style="position:relative;width:10% !important;float:left">日期</div>
+            <div class="ProcessType" type="text">@string.Format("{0:yyyy/MM/dd}", item.Date)</div>
+        </div>
+        <div class="div_type">
+            <div style="position:relative;width:10% !important;float:left">担当</div>
+            <div class="ProcessType" type="text">@item.CreateUserName</div>
+        </div>
+        @*@if (@item.ProcessType != 1)  //1:表示只有对应内容    类型不显示
+        {*@
+        <div class="div_type">
+            <div style="position:relative;width:10% !important;float:left">类型</div>
+            <div class="ProcessType" type="text">@item.AssignTypeName</div>
+        </div>
+
+        @if (showResultType_Bool.Contains((item.AssignTypeId ?? "")))//测试时显示结果
+        {
+            <div class="div_type">
+                <div style="position:relative;width:10% !important;float:left">结果</div>
+                <div class="ProcessType" type="text">
+                    @(ResultList.ContainsKey(item.ProcessResult ?? "") ? ResultList[item.ProcessResult] : "")
+                </div>
+            </div>
+        }
+        else if ("Architecture" == (item.AssignTypeId ?? ""))
+        {
+            <div class="div_type">
+                <div style="position:relative;width:10% !important;float:left">文档</div>
+                <div class="ProcessType" type="text">
+                    @(FileTypeList.ContainsKey(item.ProcessResult ?? "") ? FileTypeList[item.ProcessResult] : "")
+                </div>
+            </div>
+        }
+        else if ("AnalyzeBug" == (item.AssignTypeId ?? ""))
+        {
+            <div class="div_type">
+                <div style="position:relative;width:10% !important;float:left">Bug分析</div>
+                <div class="ProcessType" type="text">
+                    @(BugTypeList.ContainsKey(item.ProcessResult ?? "") ? BugTypeList[item.ProcessResult] : "")
+                </div>
+            </div>
+        }
+        <div class="div_type">
+            <div style="position:relative;width:10% !important;float:left">状态</div>
+            <div class="ProcessType" type="text">@item.TaskStatusStr</div>
+        </div>
+        @*}*@
+        <div class="div_type">
+            <div style="position:relative;width:10% !important;float:left">进度(%)</div>
+            <div class="ProcessType" type="text">@item.TaskPercent</div>
+        </div>
+        <div class="div_type">
+            <div style="position:relative;width:10% !important;float:left">工时</div>
+            <div class="ProcessType" type="text">@item.ActualHours</div>
+        </div>
+
+        <div class="div_content">
+            <div style="position:relative;width:10% !important;float:left;">对应内容</div>
+            <div class="ProcessType" type="text">@Html.Raw(item.TaskContent)</div>
+        </div>
+
+    </div>
+
+
+    <div class="div_bottom">
+        <ul class="fileList" style="list-style: none;border:none !important;" id="ul_@item.TaskDetailId">
+            @*加载  某个 TaskDetailId  TaskId所有的下的文件*@
+            @for (int i = 0; i < files.Count; i++)
+            {
+                if (!string.IsNullOrEmpty(files[i].FilePath))
+                {
+                    <li id="li_@files[i].Id">
+                        <i class="fa  fa-paperclip"></i>&nbsp;&nbsp;
+                        @if (!string.IsNullOrEmpty(files[i].FileName))
+                        {
+                            <a href="@Url.RouteUrl("PM_Image",new { controller = "Task", action = "DownLoadFile", taskfileid = files[i].Id, fileName = files[i].FileName.Replace(".", "_") })" id="file_@files[i].Id" filename="@files[i].TaskDetailId" style="color: #569cd6;text-decoration: none">@files[i].FileName &nbsp;&nbsp;<i class="fa fa-download" style="color:#5e656d"></i></a><p>&nbsp; &nbsp;</p>
+                        }
+                        <span class="CreaterUserId">@files[i].CreateUserName </span>
+                        <span class="CreateDateTime">@files[i].CreateDateTime</span>
+                        &nbsp;&nbsp;<i class="fa fa-trash" onclick="delFile(this)" key="@files[i].Id"></i>
+
+                    </li>
+                }
+            }
+
+        </ul>
+
+    </div>
+
+    <div style="clear:both; font-size:0.8em;text-align:right;padding-right:20px;">
+        <span>@item.UpdateUserName</span>
+        <span>@string.Format("{0:yyyy-MM-dd HH:mm:ss}", item.UpdateDateTime)</span>
+    </div>
+
+
+</div>
+
+
+

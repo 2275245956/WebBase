@@ -1,0 +1,216 @@
+﻿@using Z2.Web.Extend
+@using Z2.Core.WebApp.Model
+@using Z2.Core.Web
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+
+    List<SysRoleAuthorizeOperate> operates = null;
+    var loginController = this.ViewContext.Controller as HandlerLoginInfoController;
+    if (loginController != null)
+    {
+        operates = loginController.GetOperateCodes();
+    }
+}
+<script>
+    $(document).ready(function () {
+        getPage();//获取页面信息
+        for (var i = 0; i < elements.length; i++) {
+            $(".search").append(elements);
+           return
+        }
+    })
+    $(function () {
+        $("#btnRefresh").click(function () {
+            $.reload();
+        })
+        $("#btnAdd").click(btn_add)
+        $("#btnEdit").click(btn_edit);
+        $("#btnDel").click(btn_delete);
+        $("#btnDetail").click(btn_details);
+    })
+    @*重新加载*@
+    function reloadGrid() {
+        $("#gridList").resetSelection();
+        $("#gridList").trigger("reloadGrid");
+    }
+
+    function getPage(){
+        var pageId = "@ViewBag.Title";//获取页面id
+        $.ajax({
+            url: "/SystemManage/PageConfigure/GetFormJson",
+            type:"post",
+            data:{keyValue:pageId},
+            datatype:"json",
+            success:function(result){//将接收到的数据转成Json格式并进行绑定
+                var data = JSON.parse(result);
+                gridListData(data);
+            }
+        })
+    }
+    @*从配置页面获取所要展示在colModel上的信息，并绑定数据*@
+    @*绑定数据*@
+    function gridListData(data) {
+        var colModels = [];//将jqgrid中colModel放进数组中
+        var colId = data.ColInfoID.split(",");
+        var colName = data.ColInfoName.split(",");
+        colModels.push({ label: "Id", name: "Id", index: "Id", width: 50, algin: 'center', hidden: true, key: true })//隐藏获取id的那一列
+        for (var i = 0; i < colId.length; i++) {//循环遍历colModel
+            colModels.push({ label: colName[i], name: colId[i], index: colId[i], width: 50, algin: 'center' });
+        }
+        var $gridlist = $("#gridList");//创建jq 对象
+        var _height = (!!window.ActiveXObject || "ActiveXObject" in window) ? 110 : 145;
+        if (data.PageDiv==0) {//判断是否分页
+            $gridlist.dataGrid({
+                treeGrid: true,
+                treeGridModel: "adjacency",
+                datetype: "json",
+                url: data.Url,
+                height: $(window).height() - _height,
+                colModel: colModels,
+                pager: "#gridPager",
+                viewrecords: true,
+            });
+        }
+        else {
+            $gridlist.dataGrid({
+                treeGrid: true,
+                treeGridModel: "adjacency",
+                datetype: "json",
+                url: data.Url,
+                height: $(window).height() - _height,
+                colModel: colModels,
+                viewrecords: true,
+            });
+        }
+        $("#btn_search").click(function () {
+            $gridlist.jqGrid("setGridParam", {
+               postData: { keyword: $("#txt_keyword").val() }
+           }).trigger("reloadGrid");
+       });
+    }
+    @*测试代码*@
+    //测试代码
+    //function showData() {
+    //    var colModels = [];
+    //    colModels.push({ label: "主键", name: "Id", hidden: true, key: true });
+    //    colModels.push({ label: "产品名称", name: "ItemName", width: 150, align: "left" });
+    //    colModels.push({ label: "产品编号", name: "ItemCode", width: 150, align: "left" });
+    //    colModels.push({ label: "产品简称", name: "SimpleSpelling", width: 150, align: "left" });
+    //    colModels.push({ label: "价格范围", name: "PriceRange", width: 150, align: "left" });
+    //    colModels.push({
+    //           label: "创建时间", name: "CreaterTime", width: 150, align: "left",
+    //           formatter: "date", formatoptions: { srcformat: "Y-m-d", newformat: "Y-m-d" }
+    //       });
+    //    colModels.push({ label: "有效", name: "EnableFlag", width: 60, align: "center", formatter: function (cellvalue) { return cellvalue==1?"<i class=\"fa fa-toggle-on\"></i>":"<i class = \"fa fa-toggle-off\"></i>"}});
+    //    colModels.push({ label: "备注", name: "Description", width: 300, align: "left" });
+    //    return colModels;
+    //}
+    //function initGrid(colModels) {
+    //    var h = $(window).height() * 0.6;
+    //    $("#gridList").jqGrid({
+    //        caption: "",
+    //        datatype: "json",
+    //        mtype: "POST",
+    //        colModel: colModels,
+    //        autowidth: true,
+    //        height: 'auto',
+    //        height: h,
+    //        topmpager: false,
+    //        pager: $("#gridPanel"),
+    //        rowNum: 50,
+    //        rowList: [20, 50, 100],
+    //        viewrecords: true,
+    //    })
+    //}
+    @*新增*@
+    function btn_add() {
+        $.modalOpen({
+            id: "Form",
+            title: "新增产品",
+            url: "/Mall/ProductCategory/Form",
+            width: "710px",
+            height: "500px",
+            callBack: function (iframeld) {
+                top.frames[iframeld].submitForm();
+            }
+        });
+    }
+    @*修改*@
+    function btn_edit() {
+        var keyValue = $("#gridList").jqGridRowValue().Id;//keyValue用来判断区分新增和修改界面
+        $.modalOpen({
+            id: "Form",
+            title: "修改信息",
+            url: "/Mall/ProductCategory/Form?keyValue=" + keyValue,
+            width: "560px",
+            height: "500px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+            }
+        });
+    }
+    @*删除*@
+    function btn_delete() {
+        $.deleteForm({
+            url: "/Mall/ProductCategory/DeleteForm",
+            param: { keyValue: $("#gridList").jqGridRowValue().Id },
+            success: function () {
+                $.currentWindow().$("#gridList").resetSelection();
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+            }
+        })
+    }
+    @*详情*@
+    function btn_details() {
+        var keyValue = $("#gridList").jqGridRowValue().Id;
+        $.modalOpen({
+            id: "Detalis",
+            title: "查看信息",
+            url: "/Mall/ProductCategory/Details?keyValue=" + keyValue,
+            width: "560px",
+            height: "710px",
+            btn:null,
+        });
+    }
+    @*定义变量存放search中元素*@
+    var elements = '<table>'
+                               + '<tr>'
+                                   + '<td>'
+                                       + '<div class="input-group">'
+                                           + '<input id="txt_keyword" type="text" class="form-control" placeholder="品牌/简称" style="width: 200px;">'
+                                           + '<span class="input-group-btn">'
+                                              + '<button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>'
+                                           + '</span>'
+                                       + '</div>'
+                                   + '</td>'
+                               + '</tr>'
+                           + '</table>';
+    
+</script>
+<div class="topPanel">
+    <div class="search">
+    </div>
+    <div class="toolbar">
+        @*刷新按钮*@
+       @Html.ToolButtonRefresh("btnRefresh")
+        @*新建按钮*@
+        @Html.ToolButtonAdd("btnAdd", operates)
+        @*修改按钮*@
+        @Html.ToolButtonEdit("btnEdit", operates)
+        @*删除按钮*@
+        @Html.ToolButtonDelete("btnDel", operates)
+        @*详细按钮*@
+        @Html.ToolButtonDetail("btnDetail", operates)
+        @*导出按钮*@
+        @Html.ToolButtonExport("btnExport", operates)
+        @*自定义按钮*@
+        @Html.ToolButton("btnEnvelope", "fa fa-envelope-o", "自定义", operates, "")
+        @*<script>$('.toolbar').authorizeButton()</script>*@
+    </div>
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>
+

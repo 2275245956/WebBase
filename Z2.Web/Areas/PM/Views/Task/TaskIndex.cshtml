@@ -1,0 +1,357 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+    var TaskPriority = ViewBag.Urgent;
+}
+
+<style>
+    .warning {
+        background-color: orange;
+    }
+
+    .urgent {
+        background-color: orangered;
+    }
+
+    .TaskName {
+        color: #0563C1;
+        text-decoration: underline;
+    }
+</style>
+
+<div class="topPanel">
+    <div class="toolbar">
+
+        @*范文强 2018/12/7  修改按钮加载方式  部分视图*@
+        @Html.Partial("~/Views/Shared/_Partial_LoadButtons.cshtml")
+        @*<script>$('.toolbar').authorizeButton()</script>*@
+    </div>
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <label for="ProjectId">项目：</label>
+                </td>
+                <td style="width:100px;">
+                    @Html.DropDownList("ProjectId", (SelectList)ViewBag.ProjectList, new { @class = "form-control" })
+                </td>
+                <td>
+                    <label for="WorkerId" style="margin-left:5px;">指派：</label>
+                </td>
+                <td style="width:100px;">
+                    @Html.DropDownList("WorkerId", (SelectList)ViewBag.UserInfoList, new { @class = "form-control" })
+                </td>
+
+
+                @*根据任务类型检索*@
+                <td>
+                    <label for="AssignTypeId" style="margin-left:5px;">类型：</label>
+                </td>
+                <td style="width:100px;">
+                    @Html.DropDownList("AssignTypeId", (SelectList)ViewBag.types, new { @class = "form-control" })
+                </td>
+
+
+
+
+
+                <td>
+                    <label for="WorkerId" style="margin-left:5px;">检索：</label>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <input id="txt_keyword" type="text" class="form-control" style="width: 200px;" placeholder="项目名/任务名/任务号">
+
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                </td>
+                <td>
+                    <input style="margin-left:10px !important;" id="isclosed" type="checkbox" /><label for="isclosed">已关闭</label>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <button id="btn_search2" type="button" class="btn  btn-primary" style="width:60px !important;margin-left:10px;"><i class="fa fa-search">检索</i></button>
+
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>
+
+@section overscripts{
+    <script type="text/javascript">
+        //windowResizeHelper.after_resizeWindow = function () {
+        //    $("#gridList").setGridWidth($(window).width() - 2);
+        //}
+    </script>
+}
+
+
+@section scripts{
+    <script>
+
+        $(document).keydown(function (event) {
+            if (event.keyCode == 13) {
+                $("#btn_search").click();
+            }
+        });
+    </script>
+
+
+    <script>
+
+        function reloadGrid() {
+            $("#gridList").resetSelection();
+            $("#gridList").trigger("reloadGrid");
+        }
+
+        $(function () {
+
+            var taskHelper = {
+                loadGrid: function () {
+                    console.log($("#isme").is("checked"));
+                    //var _height = (!!window.ActiveXObject || "ActiveXObject" in window) ? 110 : 145;
+
+                    var windowWidth = $(window).width() - 100;
+
+                    $("#gridList").dataGrid({
+                        url: '@Url.Action("GeTasktList")',
+                        //height: $(window).height() - _height,
+                        width: windowWidth,
+                        //rownumbers: false,
+                        //shrinkToFit: false,
+                        postData: {
+                            searchtxt: $("#txt_keyword").val(),
+                            ProjectId: $("#ProjectId").val(),
+                            WorkerId: $("#WorkerId").val(),
+                            AssignTypeId: $("#AssignTypeId").val(), //2019/1/31  增加一个字段   AssignTypeId 来选择类型查询
+                            isclosed: $("#isclosed").is("checked"),
+                        },
+                        pager: "#gridPager",
+                        sortname: 'RowNo',
+                        viewrecords: true,
+                        sortable: false,
+                        colModel: [
+                            { label: 'TaskId', name: 'TaskId', hidden: true },
+                            {
+                                label: '项目',
+                                name: 'ProjectName',
+                                width: 80,
+                                fixed: true,
+                                align: 'left',
+                                sortable: false,
+                            },
+                            {
+                                label: '指派给',
+                                name: 'AssignUserName',
+                                width: 80,
+                                fixed: true,
+                                align: 'center',
+                                sortable: false,
+                            },
+                            {
+                                label: '类型',
+                                name: 'AssignTypeName',
+                                width: 80,
+                                fixed: true,
+                                align: 'center',
+                                sortable: false,
+                            },
+                            {
+                                label: '标题',
+                                name: 'TaskName',
+                                width: 1000,
+                                align: 'left',
+                                formatter: taskHelper.formatterTaskName,
+                                sortable: false,
+                                resizable: true,
+                            }, //, formatter: taskHelper.formatterTaskName
+                            {
+                                label: '进度(%)',
+                                name: 'AssignPercent',
+                                width: 80,
+                                fixed: true,
+                                align: 'right',
+                                sortable: false,
+                            },
+                            {
+                                label: '预计工时',
+                                name: 'EstimatedHours',
+                                width: 60,
+                                fixed: true,
+                                align: 'right',
+                                sortable: false,
+                            },
+                            {
+                                label: '开始日期',
+                                name: 'StartDateStr',
+                                width: 100,
+                                fixed: true,
+                                align: 'center',
+                                sortable: false,
+                            },
+                            {
+                                label: '预计结束日期',
+                                name: 'DueDateStr',
+                                width: 100,
+                                fixed: true,
+                                align: 'right',
+                                sortable: false,
+                            }
+                        ],
+                        gridComplete: function () {
+                            //var ids = $("#gridList").getDataIDs();
+                            //var rDate = commhelper.Dateformat(new Date(), "yyyy-MM-dd");
+                            //for (var i = 0; i < ids.length; i++) {
+                            //    var rowData = $("#gridList").getRowData(ids[i]);
+                            //    if (rDate > rowData.DueDateStr) {     // 当前时间大于计划完成时间，显示黄色
+                            //        $('#' + ids[i]).find("td").addClass("warning");
+                            //    }
+                            //}
+                        }
+                    });
+                },
+                formatterTaskName: function (cellvalue, options, rowObject) {
+
+                    var url = '@Url.Action("TaskPreView", "Task")' + '?taskId=' + rowObject.TaskId;
+                    var cells = cellvalue;
+                    if (rowObject.LinkTaskId) {
+                        cells = "#" + rowObject.LinkTaskId + "-" + cellvalue;
+
+                    }
+
+                    return '<a href="javascript:void(0);" class="TaskName" TaskId="' + rowObject.TaskId + '">' + cells + '</a>';
+                },
+                formatterWorker:
+
+            function (cellvalue, options, rowObject) {
+                var DevUserName = rowObject.DevUserName;
+                var TestUserName = rowObject.TestUserName;
+                var ReviewUserName = rowObject.ReviewUserName;
+                if (DevUserName == null) {
+                    DevUserName = '-';
+                }
+                if (TestUserName == null) {
+                    TestUserName = '-';
+                }
+                if (ReviewUserName == null) {
+                    ReviewUserName = '-';
+                }
+
+                return '<div>' +
+                    DevUserName +
+                    '</div>' +
+                    '<div>' +
+                    ReviewUserName +
+                    '</div>' +
+                    '<div>' +
+                    TestUserName +
+                    '</div>'
+            },
+                btnAddclick: function () {
+                    $.modalOpen({
+                        id: "Form",
+                        title: "新任务",
+                        url: "@Url.Action("CreateTaskView", "Task")",
+                        width: "900px",
+                        height: "700px",
+                        callBack: function (iframeId) {
+                            console.log(iframeId);
+                            console.log("callBack");
+                            top.frames[iframeId].submitForm();
+                        }
+                    });
+                },
+
+                btnDetailclick: function (taskId) {
+                    console.log(JSON.stringify(taskId));
+                    $.modalOpen({
+                        id: "Form",
+                        title: "EditTask",
+                        url: "@Url.Action("TaskPreView", "Task")?TaskID=" + taskId,
+                        width: "900px",
+                        height: "700px",
+                        callBack: function (iframeId) {
+                            top.frames[iframeId].submitForm();
+                        }
+                    });
+                },
+                searchData: function () {
+                    var postData = {
+                        searchtxt: $("#txt_keyword").val(),
+                        ProjectId: $("#ProjectId").val(),
+                        WorkerId: $("#WorkerId").val(),
+                        AssignTypeId: $("#AssignTypeId").val(), //2019/1/31  增加一个字段   AssignTypeId 来选择类型查询
+                        isclosed: $("#isclosed").is(":checked"),
+                    }
+                    $("#gridList").jqGrid('setGridParam',
+                        {
+                            datatype: 'json',
+                            postData: postData,
+                        },
+                        true).trigger("reloadGrid");
+                }
+            }
+
+            $("#ProjectId").bindSelect();
+            $("#WorkerId").bindSelect();
+            $("#AssignTypeId").bindSelect();
+            taskHelper.loadGrid();
+
+            $("#btn_search").click(function () {
+                taskHelper.searchData();
+                //$("#gridList").jqGrid().setGridParam(postdata).trigger('reloadGrid');
+            });
+
+            $("#btn_search2").click(function () {
+                taskHelper.searchData();
+            });
+
+            $("#WorkerId").change(function () {
+                taskHelper.searchData();
+            });
+
+            $("#AssignTypeId").change(function () {
+                taskHelper.searchData();
+            });
+
+            $("#ProjectId").change(function () {
+                taskHelper.searchData();
+            });
+
+            $("#btnCreate").click(taskHelper.btnAddclick);
+
+            $(document).on("click",
+                '.TaskName',
+                function () {
+                    //$.addTab();
+                    var taskId = $(this).attr("TaskId")
+                    var url = '@Url.Action("TaskPreView", "Task")' + '?TaskID=' + taskId;
+                    var url2 = '@Url.RouteUrl("SystemManage_default", new {action = "Index", controller = "Organize"})';
+                    console.log(url2);
+                    $.addNewWindow('详细', url); ///SystemManage/Organize/Index
+
+                });
+            $("#isme").change(function () {
+                taskHelper.searchData();
+            });
+
+            $("#isclosed").change(function () {
+                taskHelper.searchData();
+            });
+        })
+
+    </script>
+
+
+}
+
+
+

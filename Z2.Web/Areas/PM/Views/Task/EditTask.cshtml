@@ -1,0 +1,124 @@
+﻿@model Z2.Core.WebApp.Model.Mst_TaskModel
+@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@*, enctype = "multipart/form-data"*@
+@using (Html.BeginForm("EditTask", "Task", FormMethod.Post, new { @id = "form1" }))
+{
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs" id="TaskTab">
+            <li class="active"><a href="#BasicInfo" data-toggle="tab">基本信息</a></li>
+            <li><a href="#AssignInfo" data-toggle="tab">指派信息</a></li>
+        </ul>
+        <div class="tab-content">
+            <div id="BasicInfo" class="tab-pane active" style="padding-top: 10px; margin-right: 30px;">
+                @Html.HiddenFor(m => m.TaskId)
+                @Html.Partial("TaskEditPartialView", Model)
+            </div>
+            <div id="AssignInfo" class="tab-pane" style="padding-top: 10px;">
+                @Html.Partial("AssignInfoPartialView", Model)
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    //$(document).on("click", "#AssignInformation", function () {
+    //    getAssignList();
+    //});
+
+
+    function submitForm() {
+        var AssignList = getAssignData();
+
+        $('#TaskTab a[href="#BasicInfo"]').tab('show')
+        if (!$('#form1').formValid()) {
+            return false;
+        }
+
+        var formData = $("#form1").formSerialize();
+        formData.TaskDescription = StringUtil.Base64Encode(editor.getContent());
+        if (AssignList.length > 0) {
+            formData.AssignsStrFromView = StringUtil.Base64Encode(JSON.stringify(AssignList));
+        }
+        $.ajax({
+            url: '@Url.RouteUrl("PM_default", new{ controller = "Task", action = "EditTask"})',
+            data: formData,
+            type: "POST",
+            dataType:'json',
+            success: function (data, status) {
+                if (data.state == 'success') {
+                    $.modalClose();
+                    $.currentWindow().reloadGrid();
+                }
+                else {
+                    alert(data.message);
+                }
+            },
+            error: function (r,s,e) {
+                alert('');
+            }
+        });
+    }
+
+    function SaveAssignData() {
+        var AssignList = getGridData();
+        if (AssignList.length > 0) {
+            for (var i = 0; i < AssignList.length; i++) {
+                AssignList[i].TaskId = "@Model.TaskId";
+            }
+            var assignData = JSON.stringify(AssignList)
+            $.ajax({
+                url: "@Url.Action("EditAssign")",
+                type: "POST",
+                data: { assignData: assignData },
+                dataType: "json",
+                success: function (result) {
+                    if (result.message == "保存成功") {
+
+                    } else {
+                        alert("保存失败");
+                    }
+                }
+            })
+        }
+        deleteAssign();
+    }
+    function deleteAssign() {
+        var deleteDataRecord = $("#deleteRecord").html();
+        var dataArr = deleteDataRecord.split(",");
+        if (dataArr.length > 1) {
+            var assignData = [];
+            for (var i = 1; i < dataArr.length; i++) {
+                var data = {
+                    TaskAssignId:dataArr[i],
+                }
+                assignData.push(data);
+            }
+            $.ajax({
+                url: "@Url.Action("DeleteAssign")",
+                type: 'POST',
+                data: { assignData: JSON.stringify(assignData)},
+                dataType: "Json",
+                success: function (result) {
+                    if (result.message == "保存成功") {
+                        $.modalClose();
+                        $.currentWindow().reloadGrid();
+                    } else {
+                        alert("保存失败");
+                    }
+                }
+            })
+        }
+        else {
+            $.modalClose();
+            $.currentWindow().reloadGrid();
+        }
+    }
+    $(function () {
+        $(".form-control").attr("autocomplete", "off");
+    })
+
+</script>

@@ -1,0 +1,160 @@
+﻿
+@{
+//Layout = "页面配置";
+}
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Index.cshtml";
+}
+
+@*<h2>系统设置</h2>
+    <h3>页面配置</h3>*@
+<script>
+    $(function () {
+        gridList();
+    })
+    //刷新
+    function reloadGrid() {
+        $("#gridList").resetSelection();
+
+        $("#gridList").trigger("reloadGrid");
+    }
+    function gridList() {
+        var $gridList = $("#gridList");
+        var _height = (!!window.ActiveXObject || "ActiveXObject" in window) ? 110 : 145;
+        ////初始化表格  添加表头信息  并绑定属性
+        $gridList.dataGrid({
+            datatype: "json",
+            url: '@Url.Action("GetGridJson")',//"/SystemManage/PageConfigure/GetGridJson",
+            height: $(window).height() - _height,
+            colModel: [
+                { label: "@Resources.BaseRes.PrimaryKey", name: "ID", hidden: true, key: true },
+                { label: "@Resources.BaseRes.Page_Id", name: "PageID", width: 100, align: 'left' },
+                { label: '@Resources.BaseRes.Name', name: 'PageName', width: 180, align: 'left' },
+                { label: '@Resources.BaseRes.Mudule_UrlAddress', name: 'Url', width: 230, align: 'left' },
+                {
+                    label: '@Resources.BaseRes.Page_ifSeparatePage', name: 'PageDiv', width: 100, align: 'left',
+                    formatter: function (cellvalue) {
+                        return cellvalue == 0 ? "<i class=\"fa fa-toggle-on\"></i>" : "<i class=\"fa fa-toggle-off\"></i>";
+                    },
+                },
+                {
+                    label: '@Resources.BaseRes.Page_dataNum', name: 'PagingCount', width: 100, align: 'left',
+                    formatter: function (cellvalue) {
+                        return cellvalue == 0 ? "<label>10,20,30</label>" : "<label>30,50,100</label>";
+                    }
+                },
+                { label: '@Resources.BaseRes.Page_ColInfoName', name: 'ColInfoName', width: 150, align: 'left' },
+                { label: '@Resources.BaseRes.Page_ColInfoId', name: 'ColInfoID', width: 150, align: 'left' },
+                { label: '@Resources.BaseRes.CreaterUserId', name: 'CreateUserID', width: 100, align: 'left' },
+                {
+                    label: '@Resources.BaseRes.CreaterTime', name: 'CreateDateTime', width: 150, align: 'left',
+                    formatter: "date", formatoptions: { srcformat: 'Y-m-d H:i:s', newformat: 'Y-m-d H:i:s'}
+                },
+                { label: '@Resources.BaseRes.LastUpdateUserId', name: 'UpdateUserID', width: 100, align: 'left' },
+                {
+                    label: '@Resources.BaseRes.LastUpdateTime', name: 'UpdateDateTime', width: 100, align: 'left',
+                    formatter: "date", formatoptions: {srcformat: 'Y-m-d H:i:s', newformat: 'Y-m-d H:i:s'}
+                },
+            ],
+                    pager: "#gridPager",
+                    sortname: 'UpdateDateTime asc',
+                    viewrecords: true
+                });
+        //模糊查询
+        $("#btn_search").click(function () {
+            $gridList.jqGrid('setGridParam', {
+                postData: { keyword: $("#txt_keyword").val() },
+            }).trigger('reloadGrid');
+        });
+    }
+
+    //添加
+    function btn_add() {
+        $.modalOpen({
+            id: "Form",
+            title: "@Resources.BaseRes.Create",
+            url: '@Url.Action("Form")',//"/SystemManage/PageConfigure/Form",
+            width: "850px",
+            height: "600px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+                reloadGrid();
+            }
+        });
+    }
+    //修改
+    function btn_edit() {
+        var keyValue = $("#gridList").jqGridRowValue().PageID;
+        // alert(keyValue);
+        $.modalOpen({
+            id: "Form",
+            title: "@Resources.BaseRes.Details",
+            url: '@Url.Action("Form")' + '?keyValue=' + keyValue,//"/SystemManage/PageConfigure/Form?keyValue=" + keyValue,
+            width: "850px",
+            height: "600px",
+            callBack: function (iframeId) {
+                top.frames[iframeId].submitForm();
+                reloadGrid();
+            }
+        });
+    }
+    //删除
+    function btn_delete() {
+        $.deleteForm({
+            url: '@Url.Action("DeleteForm")',//"/SystemManage/PageConfigure/DeleteForm",
+            param: { keyValue: $("#gridList").jqGridRowValue().PageID },
+            success: function () {
+                $.currentWindow().$("#gridList").resetSelection();
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+
+            }
+        })
+    }
+
+</script>
+<div class="topPanel">
+    <div class="search">
+        <table>
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <input id="txt_keyword" type="text" class="form-control" placeholder="@Resources.BaseRes.KeyWord" style="width: 200px; ">
+                        <span class="input-group-btn">
+                            <button id="btn_search" type="button" class="btn  btn-primary"><i class="fa fa-search"></i></button>
+                        </span>
+
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="toolbar">
+        @*删除  修改 按钮*@
+        <div class="operate" style="clear:both">
+            <ul class="nav nav-pills">
+                <li class="first">@Resources.BaseRes.ItemSelected</li>
+                <li><a id="NF-edit" authorize="yes" onclick="btn_edit()"><i class="fa fa-pencil-square-o"></i>@Resources.BaseRes.Edit</a></li>
+                <li><a id="NF-delete" authorize="yes" onclick="btn_delete()"><i class="fa fa-trash-o"></i>@Resources.BaseRes.Delete</a></li>
+
+            </ul>
+            <a href="javascript:;" class="close"></a>
+        </div>
+
+        @*刷新按钮*@
+        <div class="btn-group">
+
+            <a class="btn btn-primary" onclick="$.reload()"><span class="glyphicon glyphicon-refresh"></span></a>
+        </div>
+        @*新建按钮*@
+        <div class="btn-group">
+            <a id="NF-add" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_add()"><i class="fa fa-plus"></i>@Resources.BaseRes.Create</a>
+        </div>
+    </div>
+
+</div>
+<div class="gridPanel">
+    <table id="gridList"></table>
+    <div id="gridPager"></div>
+</div>

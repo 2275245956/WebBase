@@ -1,0 +1,220 @@
+﻿@{
+    ViewBag.Title = "Form";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+<script>
+    var keyValue = $.request("keyValue");
+
+    $(function () {
+        $("#Paging").click(function () {
+            $("#PageNo1").prop("disabled", false);
+            $("#PageNo2").prop("disabled", false);
+        })
+        $("#NoPaging").click(function () {
+            $("#PageNo1").prop("disabled", true);
+            $("#PageNo2").prop("disabled", true);
+        })
+        //判断新增还是编辑
+        if (!!keyValue) {
+            $.ajax({
+                url: '@Url.Action("GetFormJson")',//"/SystemManage/PageConfigure/GetFormJson",
+                type: 'post',
+                data: { keyValue: keyValue },
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    //成功之后赋值
+                    $("#form1").formSerialize(data);
+                    //显示PagingCount
+                    var a = $("input[name='PageDiv']");
+                    for (var i = 0; i < a.length; i++) {
+                        if (a[i].value == data.PageDiv.toString()) {
+                            a[i].checked = true;
+                        }
+                        if (data.PageDiv.toString() == "1") {
+                            $("#PageNo1").prop("disabled", true);
+                            $("#PageNo2").prop("disabled", true);
+                        }
+                    }
+                    var b = $("input[name='PagingCount']");
+                    for (var i = 0; i < b.length; i++) {
+                        if (b[i].value == data.PagingCount.toString()) {
+                            b[i].checked = true;
+                        }
+                    }
+                    var colID = data.ColInfoID.split(",");
+                    var colName = data.ColInfoName.split(",");
+                    for (var i = 0; i < colID.length; i++) {
+                        createInformation(colID[i], colName[i]);
+                    }
+                }
+            });
+        }
+    })
+    function createInformation(colID, colName) {
+        var table = $("#basicMessage");
+        var array = new Array();
+        array.push("<tr id='row" + index + "'>")
+        array.push("<th class='formTitle' index=" + index + ">@Resources.BaseRes.Page_InfoName" + index + "</th>");
+        array.push("<td class='formValue'><input type='text' id=information" + index + " name=information" + index + " class='form-control required' value='" + colID + "'/></td>");
+        array.push("<th class='formTitle' index=" + index + ">@Resources.BaseRes.Page_InfoId" + index + "</th>");
+        array.push("<td class='formValue'><input type='text' id=informationID" + index + " name=informationID" + index + " class='form-control required'value='" + colName + "'/></td>");
+        array.push('<td><ul class="nav nav-pills"><li><a style="margin-left:20px;" id="NF-delete" authorize="yes" onclick="btn_delete(' + index + ')"><i class="fa fa-trash-o"></i>@Resources.BaseRes.Delete</a>');
+        array.push('</td></li></ul><a href="javascript:;" class="close"></a>');
+        array.push("</tr>");
+        table.append(array.join(""));
+        var str = $("#record").html();
+        str = str + "," + index;
+        $("#record").html(str);
+        index++;
+
+    }
+    //function initControl() {
+    //    $("#OrganizeId").bindSelect({
+    //        url: "/SystemManage/Organize/GetTreeSelectJson",
+    //    });
+    //}
+    //窗体表单提交
+    function submitForm() {
+        if (!$('#form1').formValid()) {
+            return false;
+        }
+        var record = $("#record").html();
+        var recordArr = record.split(",");
+        var colInfoName = "";
+        var colInfoID = "";
+        if (recordArr.length > 1) {
+            for (var i = 0; i < recordArr.length; i++) {
+                if (recordArr[i] == 0) {
+                    recordArr.splice(i, 1);
+                }
+            }
+            for (var i = 0; i < recordArr.length; i++) {
+                var colName = $("#information" + recordArr[i]).val();
+                var colID = $("#informationID" + recordArr[i]).val();
+                if (i == 0) {
+                    colInfoID = colInfoID + colID;
+                    colInfoName = colInfoName + colName;
+                }
+                else {
+                    colInfoID = colInfoID + "," + colID;
+                    colInfoName = colInfoName + "," + colName;
+                }
+            }
+        }
+        var postData = $("#form1").formSerialize();
+        postData["ColInfoID"] = colInfoID;
+        postData["ColInfoName"] = colInfoName;
+        //postData.ColInfoID = colInfoID;
+        //postData.ColInfoName = colInfoName;
+        postData["PageDiv"] = $("input[name='PageDiv']:checked").val();
+        postData["PagingCount"] = $("input[name='PagingCount']:checked").val();
+        $.submitForm({
+            url: '@Url.Action("SubmitForm")' + '?keyValue=' + keyValue,//"/SystemManage/PageConfigure/SubmitForm?keyValue=" + keyValue,
+            param: postData,
+            success: function () {
+                $.currentWindow().$("#gridList").trigger("reloadGrid");
+            }
+        });
+    }
+    var index = 1;
+    function btn_add() {
+        var table = $("#basicMessage");
+        var array = new Array();
+        array.push("<tr id='row" + index + "'>")
+        array.push("<th class='formTitle' index=" + index + ">@Resources.BaseRes.Page_InfoName" + index + "</th>");
+        array.push("<td class='formValue'><input type='text' id=information" + index + " name=information" + index + " class='form-control required'</td>");
+        array.push("<th class='formTitle' index=" + index + ">@Resources.BaseRes.Page_InfoId" + index + "</th>");
+        array.push("<td class='formValue'><input type='text' id=informationID" + index + " name=informationID" + index + " class='form-control required'</td>");
+        array.push('<td><ul class="nav nav-pills"><li><a style="margin-left:20px;" id="NF-delete" authorize="yes" onclick="btn_delete(' + index + ')"><i class="fa fa-trash-o"></i>@Resources.BaseRes.Delete</a>');
+        array.push('</td></li></ul><a href="javascript:;" class="close"></a>');
+        array.push("</tr>");
+        table.append(array.join(""));
+        var str = $("#record").html();
+        str = str + "," + index;
+        $("#record").html(str);
+        index++;
+    }
+    function btn_delete(idx) {
+        var record = $("#record").html();
+        //var recordArr = record.split(",");
+        //for (var i = 0; i < recordArr.length; i++) {
+        //    if (recordArr[i] == 0) {
+        //        recordArr.splice(i, 1);
+        //    }
+        //}
+        //for (var i = 0; i < recordArr.length; i++) {
+        //    if (recordArr[i] == idx) {
+        //        recordArr.splice(i, 1);
+        //    }
+        //}
+        var a = ("," + idx).toString();
+        record = record.replace(a, "");
+        $("#record").html(record);
+        $("#row" + idx).remove();
+    }
+
+</script>
+<form id="form1">
+    <label hidden="hidden" id="record">0</label>
+    <div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">@Resources.BaseRes.BaseInfo</a></li>
+        </ul>
+        <div style="padding-top: 10px; margin-right: 30px;">
+            <table class="form">
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Page_InfoId</th>
+                    <td class="formValue">
+                        <input id="PageID" name="PageID" type="text" class="form-control required" style="width:95%" maxlength="20" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Page_InfoName</th>
+                    <td class="formValue">
+                        <input id="PageName" name="PageName" type="text" class="form-control required" style="width:95%" maxlength="200" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Mudule_UrlAddress</th>
+                    <td class="formValue">
+                        <input id="Url" name="Url" type="text" class="form-control" style="width:95%" maxlength="200" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Page_ifSeparatePage</th>
+                    <td class="formValue" colspan="3">
+                        <input type="radio" value="0" id="Paging" name="PageDiv" /><label for="Paging">@Resources.BaseRes.Page_SeparatePage</label>
+                        <input type="radio" value="1" id="NoPaging" name="PageDiv" /> <label for="NoPaging">@Resources.BaseRes.Page_NoSeparatePage</label>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="formTitle">@Resources.BaseRes.Page_dataNum</th>
+                    <td class="formValue" colspan="3">
+                        <input type="radio" value="0" id="PageNo1" name="PagingCount" /><label for="PageNo1">10,20,30</label>
+                        <input type="radio" value="1" id="PageNo2" name="PagingCount" /> <label for="PageNo2">30,50,100</label>
+                    </td>
+                </tr>
+            </table>
+            <input id="ColInfoName" name="ColInfoName" hidden="hidden" />
+            <input id="ColInfoID" name="ColInfoID" hidden="hidden" />
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#">@Resources.BaseRes.BaseInfo</a></li>
+            </ul>
+            <table id="basicMessage" class="form">
+                @*<tr>
+                    <td class="formTitle">
+                        一览情报列名1
+                        <input type="text" class="form-control required" />
+                        一览情报列ID1
+                        <input type="text" class="form-control required" />
+                        <a id="NF-delete" authorize="yes" onclick="btn_delete()"><i class="fa fa-trash-o"></i>删除</a>
+                    </td>
+                                </tr>*@
+            </table>
+            <div class="btn-group" style="float:right;">
+                <a id="NF-add" authorize="yes" class="btn btn-primary dropdown-text" onclick="btn_add()"><i class="fa fa-plus"></i>@Resources.BaseRes.Create</a>
+            </div>
+        </div>
+    </div>
+</form>
